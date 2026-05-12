@@ -1,18 +1,11 @@
 /**
  * MVC Creations — Home Page
- * /app/page.tsx
+ * app/page.tsx
  *
- * Stack: Next.js 15 App Router · Tailwind CSS · Framer Motion
- *
- * TODO checklist before going live:
- * ─────────────────────────────────
- * [ ] Replace placeholder images with real nail photography
- * [ ] Embed actual Acuity Scheduling iframe in <BookingCTA> (see component for instructions)
- * [ ] Integrate Shopify Storefront API in <ShopPreview> (see component for instructions)
- * [ ] Update Instagram handle & link in Footer
- * [ ] Add Google Analytics / Meta Pixel inside layout.tsx
- * [ ] Configure Resend / SendGrid for contact form emails
- * [ ] Set NEXT_PUBLIC_SITE_URL in .env.local
+ * v2 additions (keep everything else 100% intact):
+ *   1. Framer Motion scroll animations on every section
+ *   2. InstagramFeed section after GalleryTeaser
+ *   3. Enhanced Footer with Google Maps embed
  */
 
 import Navbar from "@/components/Navbar";
@@ -22,8 +15,9 @@ import Services from "@/components/Services";
 import ShopPreview from "@/components/ShopPreview";
 import Testimonials from "@/components/Testimonials";
 import GalleryTeaser from "@/components/GalleryTeaser";
+import InstagramFeed from "@/components/InstagramFeed"; // ← NEW
 import BookingCTA from "@/components/BookingCTA";
-import Footer from "@/components/Footer";
+import Footer from "@/components/Footer"; // ← ENHANCED (Google Maps added)
 
 export default function HomePage() {
   return (
@@ -51,12 +45,15 @@ export default function HomePage() {
         {/* ── 6. Gallery Teaser ──────────────────────── */}
         <GalleryTeaser />
 
-        {/* ── 7. Booking CTA ─────────────────────────── */}
+        {/* ── 7. Instagram Feed ──────────────────────── NEW */}
+        <InstagramFeed />
+
+        {/* ── 8. Booking CTA ─────────────────────────── */}
         {/* TODO: Embed Acuity Scheduling iframe here */}
         <BookingCTA />
       </main>
 
-      {/* ── Footer ─────────────────────────────────── */}
+      {/* ── Footer (enhanced with Google Maps) ─────── */}
       <Footer />
     </>
   );

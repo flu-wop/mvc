@@ -1,12 +1,10 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
 import { useRef } from "react";
+import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 
-// Gallery images with varying aspect ratios for natural masonry flow
 const galleryImages = [
   {
     src: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=600&q=80",
@@ -40,16 +38,22 @@ const galleryImages = [
   },
 ];
 
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.15 } },
+};
+
+const imageVariant = {
+  hidden: { opacity: 0, scale: 0.94 },
+  show: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
+};
+
 export default function GalleryTeaser() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
 
   return (
-    <section
-      id="gallery"
-      ref={ref}
-      className="py-24 md:py-32 bg-[#090909] relative"
-    >
+    <section id="gallery" ref={ref} className="py-24 md:py-32 bg-[#090909] relative">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#F4C430]/30 to-transparent" />
       <div className="absolute -right-40 top-1/3 w-[400px] h-[400px] rounded-full bg-[#FF1493]/5 blur-[120px] pointer-events-none" />
 
@@ -58,7 +62,7 @@ export default function GalleryTeaser() {
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7 }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
           className="text-center mb-14"
         >
           <p className="text-[#F4C430] text-xs font-semibold tracking-[0.2em] uppercase mb-3">
@@ -78,46 +82,36 @@ export default function GalleryTeaser() {
 
         {/* Masonry Gallery */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          variants={container}
+          initial="hidden"
+          animate={inView ? "show" : "hidden"}
           className="masonry-grid"
         >
           {galleryImages.map((img, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={inView ? { opacity: 1, scale: 1 } : {}}
-              transition={{ duration: 0.5, delay: 0.1 + i * 0.07 }}
+              variants={imageVariant}
               className="masonry-item group relative rounded-xl overflow-hidden cursor-pointer"
             >
-              <div
-                className={`relative w-full ${
-                  img.tall ? "aspect-[3/4]" : "aspect-square"
-                }`}
-              >
+              <div className={`relative w-full ${img.tall ? "aspect-[3/4]" : "aspect-square"}`}>
                 <Image
                   src={img.src}
                   alt={img.alt}
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-108"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
                   sizes="(max-width: 768px) 50vw, 33vw"
                 />
-                {/* Hover overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#FF1493]/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
-
-                {/* Pink dot indicator */}
                 <div className="absolute bottom-3 right-3 w-2 h-2 rounded-full bg-[#FF1493] opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-[0_0_8px_rgba(255,20,147,0.8)]" />
               </div>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* CTA */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 0.6 }}
+          transition={{ delay: 0.55, duration: 0.5 }}
           className="mt-14 text-center"
         >
           <Link

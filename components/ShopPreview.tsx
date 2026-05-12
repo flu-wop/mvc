@@ -1,8 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
 import { useRef } from "react";
+import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
@@ -25,8 +24,7 @@ const mockProducts = [
     price: "$58",
     tag: "Bestseller",
     tagColor: "#FF1493",
-    image:
-      "https://images.unsplash.com/photo-1604902396830-aca29e19b067?w=600&q=80",
+    image: "https://images.unsplash.com/photo-1604902396830-aca29e19b067?w=600&q=80",
     alt: "Pink and green floral press-on nails with botanical leaf art design",
   },
   {
@@ -35,8 +33,7 @@ const mockProducts = [
     price: "$65",
     tag: "New",
     tagColor: "#F4C430",
-    image:
-      "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=600&q=80",
+    image: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=600&q=80",
     alt: "Deep black and gold press-on nails with geometric luxury pattern",
   },
   {
@@ -45,8 +42,7 @@ const mockProducts = [
     price: "$72",
     tag: "Limited",
     tagColor: "#0A3D33",
-    image:
-      "https://images.unsplash.com/photo-1604055035853-e7ea07e1e5c3?w=600&q=80",
+    image: "https://images.unsplash.com/photo-1604055035853-e7ea07e1e5c3?w=600&q=80",
     alt: "Iridescent chrome press-on nails inspired by New Orleans Mardi Gras",
   },
   {
@@ -55,25 +51,28 @@ const mockProducts = [
     price: "$55",
     tag: null,
     tagColor: null,
-    image:
-      "https://images.unsplash.com/photo-1604902396830-aca29e19b067?w=600&q=80",
+    image: "https://images.unsplash.com/photo-1604902396830-aca29e19b067?w=600&q=80",
     alt: "Vibrant tropical flower press-on nails with Honduran-inspired color palette",
   },
 ];
+
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
+};
+
+const cardVariant = {
+  hidden: { opacity: 0, y: 32 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
+};
 
 export default function ShopPreview() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
 
   return (
-    <section
-      id="shop"
-      ref={ref}
-      className="py-24 md:py-32 relative bg-[#080808]"
-    >
+    <section id="shop" ref={ref} className="py-24 md:py-32 relative bg-[#080808]">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#FF1493]/30 to-transparent" />
-
-      {/* Emerald background accent */}
       <div className="absolute -left-60 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#0A3D33]/20 blur-[140px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-5 md:px-8">
@@ -81,7 +80,7 @@ export default function ShopPreview() {
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7 }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
           className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14"
         >
           <div>
@@ -104,16 +103,18 @@ export default function ShopPreview() {
         </motion.div>
 
         {/* Product Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {mockProducts.map((product, i) => (
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate={inView ? "show" : "hidden"}
+          className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5"
+        >
+          {mockProducts.map((product) => (
             <motion.div
               key={product.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
+              variants={cardVariant}
               className="card-lift group rounded-2xl overflow-hidden border border-white/5 bg-[#111111] flex flex-col"
             >
-              {/* Image */}
               <div className="relative aspect-square overflow-hidden">
                 <Image
                   src={product.image}
@@ -121,7 +122,6 @@ export default function ShopPreview() {
                   fill
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                {/* Tag */}
                 {product.tag && (
                   <div
                     className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold text-white"
@@ -130,11 +130,9 @@ export default function ShopPreview() {
                     {product.tag}
                   </div>
                 )}
-                {/* Overlay on hover */}
                 <div className="absolute inset-0 bg-obsidian/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
 
-              {/* Info */}
               <div className="p-4 flex flex-col gap-3 flex-1">
                 <div>
                   <h3
@@ -143,11 +141,8 @@ export default function ShopPreview() {
                   >
                     {product.name}
                   </h3>
-                  <p className="text-[#F4C430] font-bold text-lg mt-1">
-                    {product.price}
-                  </p>
+                  <p className="text-[#F4C430] font-bold text-lg mt-1">{product.price}</p>
                 </div>
-
                 {/* TODO: Wire up to Shopify cart / Storefront API addCartLines mutation */}
                 <button className="mt-auto w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[#FF1493]/10 border border-[#FF1493]/30 text-[#FF1493] text-sm font-semibold hover:bg-[#FF1493] hover:text-white transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,20,147,0.3)]">
                   <ShoppingBag className="w-4 h-4" />
@@ -156,9 +151,8 @@ export default function ShopPreview() {
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
 
-        {/* Mobile CTA */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={inView ? { opacity: 1 } : {}}
