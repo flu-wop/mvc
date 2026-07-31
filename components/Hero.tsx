@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -50,16 +51,21 @@ export default function Hero() {
           Welcome to
         </motion.p>
 
-        <motion.h1
+        <motion.div
           variants={fadeUp}
           initial="hidden"
           animate="show"
           custom={0.15}
-          className="text-white text-6xl sm:text-7xl md:text-8xl mb-4"
-          style={{ fontFamily: "var(--font-script)" }}
+          className="relative h-24 sm:h-28 md:h-32 mx-auto mb-4"
         >
-          MVC Creations
-        </motion.h1>
+          <Image
+            src="/images/logo-white.png"
+            alt="MVC Creations"
+            fill
+            className="object-contain"
+            priority
+          />
+        </motion.div>
 
         <motion.p
           variants={fadeUp}

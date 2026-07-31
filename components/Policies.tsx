@@ -12,6 +12,7 @@ const policies = [
     summary: "Please arrive 10 minutes early.",
     detail:
       "Please arrive 10 minutes early to help ensure we begin promptly. I take pride in providing detailed, quality work and do not rush my services, so appointments may run longer than standard salon timing. Thank you for your patience and understanding as I work to give you the best experience possible.",
+    accent: "#C9A356",
   },
   {
     icon: DollarSign,
@@ -19,6 +20,7 @@ const policies = [
     summary: "$30 non-refundable deposit secures your appointment.",
     detail:
       "All services require a non-refundable $30 fee to secure your appointment. Travel appointments require a $75–$100 travel fee, and before/after-hours appointments require a $50 fee. These fees do not go toward your service total and are separate charges, serving as the deposit to hold your appointment.",
+    accent: "#C0C0C0",
   },
   {
     icon: Clock,
@@ -26,6 +28,7 @@ const policies = [
     summary: "10-minute grace period on late arrivals.",
     detail:
       "Please arrive 10 minutes early to receive your full service time. A 10-minute grace period is allowed. After 10 minutes, a $10 late fee will apply, and the appointment may be canceled at my discretion with deposit forfeiture. If accepted beyond the grace period, an additional $1 per minute late fee may apply if agreed upon before continuing the appointment.",
+    accent: "#C9A356",
   },
   {
     icon: XCircle,
@@ -33,6 +36,7 @@ const policies = [
     summary: "24-hour notice to reschedule or cancel.",
     detail:
       "You can reschedule or cancel up to 24 hours ahead of your appointment. Failure to do so will result in your card being charged 50% of the total balance. No shows are charged 100%.",
+    accent: "#C0C0C0",
   },
 ];
 
@@ -49,38 +53,60 @@ export default function Policies() {
   const [open, setOpen] = useState<string | null>(null);
 
   return (
-    <section id="policies" ref={ref} className="py-14 md:py-16 bg-ink border-t border-border">
+    <section id="policies" ref={ref} className="py-14 md:py-16 bg-ink relative">
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
+
       <div className="max-w-5xl mx-auto px-5 md:px-8">
-        <div className="text-center mb-14">
-          <p className="text-gold text-xs font-semibold tracking-[0.2em] uppercase mb-2">Booking</p>
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="text-center mb-14"
+        >
+          <p className="text-gold text-xs font-semibold tracking-[0.2em] uppercase mb-3">
+            ✦ Good to Know
+          </p>
           <h2 className="text-5xl md:text-6xl" style={{ fontFamily: "var(--font-script)" }}>
-            Policies
+            Booking Policies
           </h2>
-        </div>
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="divide-y divide-border border-y border-border"
+          transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+          className="grid sm:grid-cols-2 gap-4"
         >
-          {policies.map((policy, i) => {
+          {policies.map((policy) => {
             const Icon = policy.icon;
             const isOpen = open === policy.title;
-            const accent = i % 2 === 0 ? "text-gold" : "text-silver";
             return (
-              <div key={policy.title}>
+              <div
+                key={policy.title}
+                className="rounded-2xl border border-border overflow-hidden"
+                style={{ background: `${policy.accent}0d` }}
+              >
                 <button
                   onClick={() => setOpen(isOpen ? null : policy.title)}
-                  className="w-full flex items-center gap-4 py-5 text-left group"
+                  className="w-full flex items-center gap-4 p-6 text-left"
                 >
-                  <Icon className={`w-5 h-5 ${accent} shrink-0`} />
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ background: `${policy.accent}20`, border: `1px solid ${policy.accent}40` }}
+                  >
+                    <Icon className="w-5 h-5" style={{ color: policy.accent }} />
+                  </div>
                   <span className="flex-1">
-                    <span className="text-white font-semibold block">{policy.title}</span>
-                    <span className="text-grey text-sm block mt-0.5">{policy.summary}</span>
+                    <span
+                      className="text-white font-semibold block"
+                      style={{ fontFamily: "var(--font-playfair)" }}
+                    >
+                      {policy.title}
+                    </span>
+                    <span className="text-white/50 text-sm block mt-0.5">{policy.summary}</span>
                   </span>
                   <ChevronDown
-                    className={`w-4 h-4 text-grey shrink-0 transition-transform duration-300 ${
+                    className={`w-4 h-4 text-white/40 shrink-0 transition-transform duration-300 ${
                       isOpen ? "rotate-180" : ""
                     }`}
                   />
@@ -94,7 +120,7 @@ export default function Policies() {
                       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                       className="overflow-hidden"
                     >
-                      <p className="text-white/60 text-sm leading-relaxed pb-6 pl-9 pr-4">
+                      <p className="text-white/55 text-sm leading-relaxed px-6 pb-6">
                         {policy.detail}
                       </p>
                     </motion.div>
@@ -104,20 +130,25 @@ export default function Policies() {
             );
           })}
 
-          {/* Before your appointment — same accordion pattern */}
-          <div>
+          {/* Before your appointment — spans full width */}
+          <div className="sm:col-span-2 rounded-2xl border border-border overflow-hidden bg-white/[0.02]">
             <button
               onClick={() => setOpen(open === "Prep" ? null : "Prep")}
-              className="w-full flex items-center gap-4 py-5 text-left group"
+              className="w-full flex items-center gap-4 p-6 text-left"
             >
               <span className="flex-1">
-                <span className="text-white font-semibold block">Before Your Appointment</span>
-                <span className="text-grey text-sm block mt-0.5">
+                <span
+                  className="text-white font-semibold block"
+                  style={{ fontFamily: "var(--font-playfair)" }}
+                >
+                  Before Your Appointment
+                </span>
+                <span className="text-white/50 text-sm block mt-0.5">
                   A few things to know before you arrive.
                 </span>
               </span>
               <ChevronDown
-                className={`w-4 h-4 text-grey shrink-0 transition-transform duration-300 ${
+                className={`w-4 h-4 text-white/40 shrink-0 transition-transform duration-300 ${
                   open === "Prep" ? "rotate-180" : ""
                 }`}
               />
@@ -131,7 +162,7 @@ export default function Policies() {
                   transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                   className="overflow-hidden"
                 >
-                  <ul className="text-white/60 text-sm leading-relaxed pb-6 pl-4 pr-4 space-y-3 list-disc list-inside">
+                  <ul className="text-white/55 text-sm leading-relaxed px-6 pb-6 space-y-3 list-disc list-inside">
                     {prep.map((line) => (
                       <li key={line}>{line}</li>
                     ))}
