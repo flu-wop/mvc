@@ -19,13 +19,13 @@ export default function Hero() {
       {/* Marble background */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/images/marble-hero.jpg"
-          alt="Black marble background"
+          src="https://images.unsplash.com/photo-1604654894610-df63bc536371?w=1800&q=85"
+          alt="Luxury nail art close-up"
           fill
           priority
           className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-ink/40" />
+        <div className="absolute inset-0 bg-ink/50" />
       </div>
 
       {/* Content */}
