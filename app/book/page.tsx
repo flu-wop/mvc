@@ -10,15 +10,16 @@ export default function BookPage() {
         Let&apos;s get you booked
       </h1>
 
-      <div className="w-full max-w-3xl rounded-2xl overflow-hidden border border-border bg-white" style={{ height: 800 }}>
+      <div className="w-full max-w-3xl rounded-2xl overflow-hidden border border-border bg-white" style={{ height: 900 }}>
         <iframe
           src="https://app.acuityscheduling.com/schedule.php?owner=19553804&ref=embedded_csp"
           title="Schedule Appointment — MVC Creations"
           width="100%"
-          height="1020"
+          height="2300"
           frameBorder="0"
+          scrolling="no"
           allow="payment"
-          style={{ marginTop: -220, display: "block" }}
+          style={{ marginTop: -1350, display: "block" }}
         />
       </div>
 
