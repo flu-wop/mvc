@@ -1,25 +1,27 @@
-// /app/book/page.tsx
-// This page can either embed Acuity directly or redirect to the external scheduler
-// Option: Add `redirect('https://mvcxcreations.as.me/schedule/27795b22')` from next/navigation for instant redirect
-
-import Link from "next/link";
+import Script from "next/script";
 
 export default function BookPage() {
   return (
-    <main className="min-h-screen bg-[#0C0C0C] flex flex-col items-center justify-center text-white px-6 text-center">
-      <p className="text-[#F4C430] text-xs font-semibold tracking-widest uppercase mb-4">Book a Session</p>
-      <h1 className="text-5xl font-bold mb-4" style={{ fontFamily: "var(--font-playfair)" }}>Let&apos;s Get Glam</h1>
-      <p className="text-white/50 mb-8 max-w-sm">Choose your service and pick a time that works for you.</p>
-      {/* TODO: Replace with embedded Acuity iframe */}
-      <a
-        href="https://mvcxcreations.as.me/schedule/27795b22"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="px-8 py-4 rounded-full bg-[#FF1493] text-white font-bold text-base hover:bg-[#FF1493]/90 transition-all hover:shadow-[0_0_40px_rgba(255,20,147,0.4)] mb-6"
-      >
-        Open Full Scheduler ✦
-      </a>
-      <Link href="/" className="text-white/40 text-sm hover:text-white transition-colors">← Back to Home</Link>
+    <main className="min-h-screen bg-ink flex flex-col items-center px-5 pt-28 pb-16">
+      <p className="text-gold text-xs font-semibold tracking-[0.2em] uppercase mb-3">
+        Book a Session
+      </p>
+      <h1 className="text-5xl mb-8" style={{ fontFamily: "var(--font-script)" }}>
+        Let&apos;s get you booked
+      </h1>
+
+      <div className="w-full max-w-3xl rounded-2xl overflow-hidden border border-border bg-white">
+        <iframe
+          src="https://app.acuityscheduling.com/schedule.php?owner=19553804&ref=embedded_csp"
+          title="Schedule Appointment — MVC Creations"
+          width="100%"
+          height="800"
+          frameBorder="0"
+          allow="payment"
+        />
+      </div>
+
+      <Script src="https://embed.acuityscheduling.com/js/embed.js" strategy="lazyOnload" />
     </main>
   );
 }

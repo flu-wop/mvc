@@ -10,32 +10,26 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        emerald: {
-          deep: "#0A3D33",
-          mid: "#0F5244",
-          light: "#1A7A60",
-        },
-        pink: {
-          hot: "#FF1493",
-          soft: "#FF69B4",
-          pale: "#FFB6C1",
-        },
+        ink: "#0A0A0A",
+        charcoal: "#141414",
+        card: "#1A1A1A",
+        border: "#2A2A2A",
         gold: {
-          DEFAULT: "#F4C430",
-          deep: "#D4A017",
-          pale: "#FDE68A",
+          DEFAULT: "#C9A356",
+          light: "#E3C787",
+          dark: "#A9824A",
         },
-        cream: "#FDF6EC",
-        obsidian: "#0C0C0C",
+        cream: "#F7F3EC",
+        mist: "#A89880",
       },
       fontFamily: {
         display: ["var(--font-playfair)", "Georgia", "serif"],
+        script: ["var(--font-script)", "cursive"],
         body: ["var(--font-dm-sans)", "sans-serif"],
       },
       animation: {
         shimmer: "shimmer 2.5s linear infinite",
         float: "float 6s ease-in-out infinite",
-        "spin-slow": "spin 12s linear infinite",
       },
       keyframes: {
         shimmer: {
@@ -44,13 +38,13 @@ const config: Config = {
         },
         float: {
           "0%, 100%": { transform: "translateY(0px)" },
-          "50%": { transform: "translateY(-12px)" },
+          "50%": { transform: "translateY(-10px)" },
         },
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gold-shimmer":
-          "linear-gradient(90deg, #F4C430 0%, #FDE68A 40%, #F4C430 60%, #D4A017 100%)",
+          "linear-gradient(90deg, #A9824A 0%, #E3C787 40%, #C9A356 60%, #A9824A 100%)",
       },
     },
   },
