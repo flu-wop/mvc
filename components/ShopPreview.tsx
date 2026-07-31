@@ -10,7 +10,7 @@ export default function ShopPreview() {
   const inView = useInView(ref, { once: true, margin: "-60px" });
 
   return (
-    <section id="shop" ref={ref} className="py-24 md:py-28 bg-charcoal border-t border-border">
+    <section id="shop" ref={ref} className="py-14 md:py-16 bg-charcoal border-t border-border">
       <div className="max-w-3xl mx-auto px-5 md:px-8 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

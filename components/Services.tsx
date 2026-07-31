@@ -27,7 +27,7 @@ export default function Services() {
   const inView = useInView(ref, { once: true, margin: "-60px" });
 
   return (
-    <section id="services" ref={ref} className="py-24 md:py-28 bg-ink">
+    <section id="services" ref={ref} className="py-14 md:py-16 bg-ink">
       <div className="max-w-6xl mx-auto px-5 md:px-8">
         <div className="text-center mb-14">
           <p className="text-gold text-xs font-semibold tracking-[0.2em] uppercase mb-2">Our</p>

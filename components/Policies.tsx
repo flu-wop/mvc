@@ -48,7 +48,7 @@ export default function Policies() {
   const [open, setOpen] = useState<string | null>(null);
 
   return (
-    <section id="policies" ref={ref} className="py-24 md:py-28 bg-ink border-t border-border">
+    <section id="policies" ref={ref} className="py-14 md:py-16 bg-ink border-t border-border">
       <div className="max-w-5xl mx-auto px-5 md:px-8">
         <div className="text-center mb-14">
           <p className="text-gold text-xs font-semibold tracking-[0.2em] uppercase mb-2">Booking</p>

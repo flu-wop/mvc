@@ -19,7 +19,7 @@ export default function AboutTeaser() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section id="about" ref={ref} className="relative py-24 md:py-32 bg-ink">
+    <section id="about" ref={ref} className="relative py-14 md:py-20 bg-ink">
       <div className="max-w-6xl mx-auto px-5 md:px-8">
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
           {/* Portrait */}

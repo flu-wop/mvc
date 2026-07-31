@@ -12,7 +12,7 @@ export default function BookingCTA() {
     <section
       id="booking"
       ref={ref}
-      className="py-24 md:py-28 bg-charcoal border-t border-border"
+      className="py-14 md:py-16 bg-charcoal border-t border-border"
     >
       <div className="max-w-3xl mx-auto px-5 md:px-8 text-center">
         <motion.p
