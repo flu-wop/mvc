@@ -48,14 +48,15 @@ export default function BookingCTA() {
         transition={{ duration: 0.6, delay: 0.15 }}
         className="max-w-3xl mx-auto px-5 md:px-8"
       >
-        <div className="rounded-2xl overflow-hidden border border-border bg-white">
+        <div className="rounded-2xl overflow-hidden border border-border bg-white" style={{ height: 800 }}>
           <iframe
             src="https://app.acuityscheduling.com/schedule.php?owner=19553804&ref=embedded_csp"
             title="Schedule Appointment — MVC Creations"
             width="100%"
-            height="800"
+            height="1020"
             frameBorder="0"
             allow="payment"
+            style={{ marginTop: -220, display: "block" }}
           />
         </div>
       </motion.div>
