@@ -2,15 +2,15 @@ import Script from "next/script";
 
 export default function BookPage() {
   return (
-    <main className="min-h-screen bg-[#0C0C0C] flex flex-col items-center px-5 pt-28 pb-16">
-      <p className="text-[#F4C430] text-xs font-semibold tracking-widest uppercase mb-4">
+    <main className="min-h-screen bg-ink flex flex-col items-center px-5 pt-28 pb-16">
+      <p className="text-gold text-xs font-semibold tracking-[0.2em] uppercase mb-3">
         Book a Session
       </p>
-      <h1 className="text-5xl font-bold mb-8 text-white" style={{ fontFamily: "var(--font-playfair)" }}>
-        Let&apos;s Get You Booked
+      <h1 className="text-5xl mb-8" style={{ fontFamily: "var(--font-script)" }}>
+        Let&apos;s get you booked
       </h1>
 
-      <div className="w-full max-w-3xl rounded-2xl overflow-hidden border border-white/10 bg-white">
+      <div className="w-full max-w-3xl rounded-2xl overflow-hidden border border-border bg-white">
         <iframe
           src="https://app.acuityscheduling.com/schedule.php?owner=19553804&ref=embedded_csp"
           title="Schedule Appointment — MVC Creations"
