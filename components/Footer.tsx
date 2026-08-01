@@ -22,8 +22,17 @@ function TikTokIcon({ className }: { className?: string }) {
   );
 }
 
+function FacebookIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.99 3.66 9.13 8.44 9.88v-6.99h-2.54V12h2.54V9.8c0-2.5 1.5-3.9 3.78-3.9 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99C18.34 21.13 22 16.99 22 12z" />
+    </svg>
+  );
+}
+
 const socials = [
   { label: "Instagram", href: "https://www.instagram.com/mvcxcreations", icon: InstagramIcon },
+  { label: "Facebook", href: "https://www.facebook.com/mvcxcreations", icon: FacebookIcon },
   { label: "TikTok", href: "https://www.tiktok.com/@mvcxcreations", icon: TikTokIcon },
 ];
 

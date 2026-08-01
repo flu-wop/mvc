@@ -17,7 +17,7 @@ export default function Hero() {
   return (
     <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
       {/* CSS marble background — no photo, so no risk of baked-in text */}
-      <div
+      <motion.div
         className="absolute inset-0 z-0"
         style={{
           background:
@@ -25,7 +25,10 @@ export default function Hero() {
             "radial-gradient(ellipse 70% 50% at 85% 90%, rgba(201,163,86,0.06), transparent 60%), " +
             "radial-gradient(ellipse 60% 80% at 90% 15%, rgba(255,255,255,0.04), transparent 55%), " +
             "linear-gradient(135deg, #0A0A0A 0%, #151515 40%, #0A0A0A 70%, #111111 100%)",
+          backgroundSize: "140% 140%",
         }}
+        animate={{ backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] }}
+        transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
       >
         {/* Fine vein streaks */}
         <div
@@ -37,7 +40,7 @@ export default function Hero() {
           }}
         />
         <div className="absolute inset-0 bg-ink/35" />
-      </div>
+      </motion.div>
 
       {/* Content */}
       <div className="relative z-10 max-w-3xl mx-auto px-5 md:px-8 pt-20 pb-14 text-center">
@@ -74,7 +77,7 @@ export default function Hero() {
           custom={0.3}
           className="text-gold text-sm md:text-base tracking-widest uppercase mb-10"
         >
-          Nails, made personal
+          Kenner, LA · Near MSY Airport
         </motion.p>
 
         <motion.div
@@ -88,13 +91,13 @@ export default function Hero() {
             href="#booking"
             className="px-8 py-4 rounded-full bg-gold text-ink font-semibold text-base transition-all duration-300 hover:bg-gold-light hover:scale-105 active:scale-95"
           >
-            Book an Appointment
+            Book Appointment
           </Link>
           <Link
-            href="#services"
+            href="/shop"
             className="px-8 py-4 rounded-full border border-white/30 text-white font-medium text-base transition-all duration-300 hover:border-silver hover:text-silver"
           >
-            View Services
+            Shop Online
           </Link>
         </motion.div>
       </div>

@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import { Calendar, DollarSign, Clock, XCircle, ChevronDown } from "lucide-react";
 
 const policies = [
@@ -64,7 +63,7 @@ export default function Policies() {
           className="text-center mb-14"
         >
           <p className="text-gold text-xs font-semibold tracking-[0.2em] uppercase mb-3">
-            ✦ Good to Know
+            Good to Know
           </p>
           <h2 className="text-5xl md:text-6xl" style={{ fontFamily: "var(--font-script)" }}>
             Booking Policies
@@ -172,15 +171,6 @@ export default function Policies() {
             </AnimatePresence>
           </div>
         </motion.div>
-
-        <div className="text-center mt-10">
-          <Link
-            href="#booking"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-gold text-ink font-semibold text-sm hover:bg-gold-light transition-all duration-300 hover:scale-105 active:scale-95"
-          >
-            ✦ Book Your Session
-          </Link>
-        </div>
       </div>
     </section>
   );
