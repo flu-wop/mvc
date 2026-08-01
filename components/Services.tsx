@@ -5,11 +5,11 @@ import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 
 const services = [
-  { title: "Acrylic", image: "/images/service-acrylic.jpg" },
-  { title: "Gel-X", image: "/images/service-gel-x.jpg" },
-  { title: "Natural Nails", image: "/images/service-natural-nails.jpg" },
-  { title: "Nail Art", image: "/images/service-nail-art.jpg" },
-  { title: "Press-Ons", image: "/images/service-press-ons.jpg" },
+  { title: "Acrylic", image: "/images/service-acrylic.jpg", from: 65 },
+  { title: "Gel-X", image: "/images/service-gel-x.jpg", from: 70 },
+  { title: "Natural Nails", image: "/images/service-natural-nails.jpg", from: 45 },
+  { title: "Nail Art", image: "/images/service-nail-art.jpg", from: 110 },
+  { title: "Press-Ons", image: "/images/service-press-ons.jpg", from: 50 },
 ];
 
 const container = {
@@ -61,10 +61,15 @@ export default function Services() {
                 <p className="text-white text-sm font-semibold tracking-wide uppercase">
                   {service.title}
                 </p>
+                <p className="text-grey text-xs">From ${service.from}</p>
               </motion.div>
             );
           })}
         </motion.div>
+
+        <p className="text-center text-grey text-xs mt-8">
+          Prices shown are starting rates — final pricing is confirmed at booking based on length, design, and any add-ons.
+        </p>
       </div>
     </section>
   );
