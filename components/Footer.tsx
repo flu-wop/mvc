@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { MapPin, Phone, Mail } from "lucide-react";
@@ -41,8 +42,13 @@ export default function Footer() {
         >
           {/* Brand */}
           <div>
-            <span className="text-2xl" style={{ fontFamily: "var(--font-script)" }}>
-              MVC Creations
+            <span className="relative block h-10 w-40 mb-1">
+              <Image
+                src="/images/logo-white.png"
+                alt="MVC Creations"
+                fill
+                className="object-contain object-left"
+              />
             </span>
             <p className="text-white/45 text-sm leading-relaxed mt-4 mb-5 max-w-xs">
               Licensed nail technician based in Kenner, near MSY. Book below.

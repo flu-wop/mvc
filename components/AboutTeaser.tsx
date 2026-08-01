@@ -29,12 +29,12 @@ export default function AboutTeaser() {
             animate={inView ? "show" : "hidden"}
             className="relative mx-auto md:mx-0 w-full max-w-sm"
           >
-            <div className="relative aspect-[2/3] rounded-2xl overflow-hidden border border-border">
+            <div className="relative aspect-[4/5] rounded-[50%] overflow-hidden border border-border">
               <Image
                 src="/images/margie-portrait.jpg"
                 alt="Margie, licensed nail technician and owner of MVC Creations"
                 fill
-                className="object-cover object-center"
+                className="object-cover object-top"
               />
             </div>
           </motion.div>

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
@@ -33,14 +32,8 @@ export default function Navbar() {
       }`}
     >
       <div className="max-w-6xl mx-auto px-5 md:px-8 flex items-center justify-between h-[68px]">
-        <Link href="/" className="relative h-8 w-32">
-          <Image
-            src="/images/logo-white.png"
-            alt="MVC Creations"
-            fill
-            className="object-contain object-left"
-            priority
-          />
+        <Link href="/" className="text-2xl" style={{ fontFamily: "var(--font-script)" }}>
+          <span className="text-white">MVC Creations</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
