@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getDb, initDb } from "@/lib/db";
 
-// TODO: wire this up to Resend (audience/contact list) or Turso, same pattern
-// as the booking-system stack on Epoch Skin / Jade the Gem / MCS. Right now
-// this just validates the email and returns success — no email is actually
-// stored or sent yet.
+export const runtime = "nodejs";
+
 export async function POST(req: NextRequest) {
   const { email } = await req.json();
 
@@ -11,6 +10,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid email" }, { status: 400 });
   }
 
-  // Placeholder — real persistence not yet wired up.
-  return NextResponse.json({ ok: true });
+  try {
+    await initDb();
+    const db = getDb();
+    await db.execute({
+      sql: `INSERT INTO newsletter (email) VALUES (?) ON CONFLICT(email) DO NOTHING`,
+      args: [email],
+    });
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("newsletter signup failed", err);
+    return NextResponse.json({ error: "Could not save signup" }, { status: 500 });
+  }
 }

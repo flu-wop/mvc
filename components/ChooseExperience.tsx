@@ -3,7 +3,6 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import Link from "next/link";
-import Image from "next/image";
 import { ShoppingBag, Calendar, Sparkles, Camera, Handshake } from "lucide-react";
 
 const cards = [
@@ -13,7 +12,6 @@ const cards = [
     cta: "Book Now",
     href: "#booking",
     icon: Calendar,
-    image: "/images/service-acrylic.jpg",
     accent: "gold",
   },
   {
@@ -22,7 +20,6 @@ const cards = [
     cta: "Shop Now",
     href: "/press-ons",
     icon: Sparkles,
-    image: "/images/service-press-ons.jpg",
     accent: "silver",
   },
   {
@@ -31,7 +28,6 @@ const cards = [
     cta: "Shop Now",
     href: "/shop",
     icon: ShoppingBag,
-    image: "/images/service-natural-nails.jpg",
     accent: "gold",
   },
   {
@@ -40,7 +36,6 @@ const cards = [
     cta: "Learn More",
     href: "/content-creation",
     icon: Camera,
-    image: "/images/service-nail-art.jpg",
     accent: "silver",
   },
   {
@@ -49,7 +44,6 @@ const cards = [
     cta: "Contact Me",
     href: "/contact",
     icon: Handshake,
-    image: "/images/service-gel-x.jpg",
     accent: "gold",
   },
 ];
@@ -73,35 +67,38 @@ export default function ChooseExperience() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {cards.map((card, i) => {
             const Icon = card.icon;
+            const accentClass = card.accent === "gold" ? "gold" : "silver";
             return (
               <motion.div
                 key={card.title}
                 initial={{ opacity: 0, y: 24 }}
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.55, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                className="group relative rounded-2xl overflow-hidden border border-border"
+                className="group relative rounded-2xl overflow-hidden border border-border bg-white/[0.02] flex flex-col"
               >
-                <div className="relative aspect-[4/3]">
-                  <Image
-                    src={card.image}
-                    alt={card.title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-transparent" />
-                </div>
-                <div className="absolute inset-0 flex flex-col justify-end p-6">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 ${
-                      card.accent === "gold" ? "bg-gold/20 border border-gold/40" : "bg-silver/20 border border-silver/40"
+                {/* Elegant placeholder panel — no repeated photography */}
+                <div
+                  className="relative aspect-[4/3] flex items-center justify-center overflow-hidden"
+                  style={{
+                    background:
+                      card.accent === "gold"
+                        ? "radial-gradient(ellipse at 50% 30%, rgba(201,163,86,0.16), transparent 70%), linear-gradient(160deg, #151515, #0A0A0A)"
+                        : "radial-gradient(ellipse at 50% 30%, rgba(192,192,192,0.14), transparent 70%), linear-gradient(160deg, #151515, #0A0A0A)",
+                  }}
+                >
+                  <Icon
+                    className={`w-10 h-10 transition-transform duration-500 group-hover:scale-110 ${
+                      card.accent === "gold" ? "text-gold/70" : "text-silver/70"
                     }`}
-                  >
-                    <Icon className={`w-4.5 h-4.5 ${card.accent === "gold" ? "text-gold" : "text-silver"}`} />
-                  </div>
+                    strokeWidth={1.25}
+                  />
+                </div>
+
+                <div className="p-6 flex-1 flex flex-col">
                   <h3 className="text-white text-lg font-semibold mb-1" style={{ fontFamily: "var(--font-playfair)" }}>
                     {card.title}
                   </h3>
-                  <p className="text-white/60 text-sm mb-4">{card.body}</p>
+                  <p className="text-white/60 text-sm mb-4 flex-1">{card.body}</p>
                   <Link
                     href={card.href}
                     className={`inline-flex w-fit items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105 ${
