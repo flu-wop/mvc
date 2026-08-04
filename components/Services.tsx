@@ -81,21 +81,21 @@ export default function Services() {
               <motion.div
                 key={service.title}
                 variants={cardVariant}
-                className="rounded-2xl border border-border overflow-hidden bg-white/[0.02]"
+                className="rounded-2xl border border-border overflow-hidden bg-white/[0.02] flex flex-col items-center pt-6 px-5 pb-5"
               >
-                <div className={`relative w-full aspect-[4/3] overflow-hidden border-b-2 ${accent}`}>
+                <div className={`relative w-40 aspect-[4/5] overflow-hidden rounded-t-[999px] border-2 mb-5 ${accent}`}>
                   <Image src={service.image} alt={service.title} fill className="object-cover" />
                 </div>
-                <div className="p-5">
-                  <div className="flex items-start justify-between gap-3 mb-1">
+                <div className="w-full text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1">
                     <p className="text-white text-base font-semibold">{service.title}</p>
-                    <p className="text-grey text-xs whitespace-nowrap pt-0.5">From ${service.from}</p>
                   </div>
+                  <p className="text-grey text-xs mb-2">From ${service.from}</p>
                   <p className="text-grey text-sm leading-relaxed">{service.summary}</p>
 
                   <button
                     onClick={() => setOpen(isOpen ? null : service.title)}
-                    className="flex items-center gap-1.5 text-gold text-xs font-semibold mt-3 hover:text-gold-light transition-colors"
+                    className="flex items-center gap-1.5 text-gold text-xs font-semibold mt-3 mx-auto hover:text-gold-light transition-colors"
                   >
                     {isOpen ? "Show less" : "Read more"}
                     <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />

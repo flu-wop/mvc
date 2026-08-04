@@ -8,11 +8,6 @@ export default function FAQPage() {
     <>
       <Navbar />
       <main className="min-h-screen bg-ink pt-24">
-        <div className="text-center pt-10 px-5">
-          <p className="text-white/50 text-sm max-w-md mx-auto">
-            Everything you need to know before booking your luxury experience.
-          </p>
-        </div>
         <FAQ />
         <div className="max-w-2xl mx-auto px-5 md:px-8 py-14 text-center border-t border-border">
           <h2 className="text-3xl mb-3" style={{ fontFamily: "var(--font-script)" }}>

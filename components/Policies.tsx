@@ -16,9 +16,9 @@ const policies = [
   {
     icon: DollarSign,
     title: "Deposits",
-    summary: "$30 non-refundable deposit secures your appointment.",
+    summary: "A non-refundable deposit applies toward your service total.",
     detail:
-      "All services require a non-refundable $30 fee to secure your appointment. Travel appointments require a $75–$100 travel fee, and before/after-hours appointments require a $50 fee. These fees do not go toward your service total and are separate charges, serving as the deposit to hold your appointment.",
+      "A non-refundable deposit is required to reserve every appointment. This deposit applies toward your service total. Travel appointments require an additional travel fee based on distance, which is separate from the service and deposit.",
     accent: "#C0C0C0",
   },
   {

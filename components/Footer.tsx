@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { MapPin, Phone, Mail } from "lucide-react";
+import FlowerDivider from "@/components/FlowerDivider";
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
@@ -62,6 +63,9 @@ export default function Footer() {
 
   return (
     <footer ref={ref} className="relative bg-charcoal border-t border-border">
+      <div className="text-gold/50 pt-6">
+        <FlowerDivider />
+      </div>
       {/* VIP Newsletter */}
       <div className="border-b border-border">
         <div className="max-w-2xl mx-auto px-5 md:px-8 py-14 text-center">
