@@ -15,7 +15,6 @@ import Policies from "@/components/Policies";
 import FeaturedCollaborations from "@/components/FeaturedCollaborations";
 import BookingCTA from "@/components/BookingCTA";
 import Footer from "@/components/Footer";
-import FlowerDivider from "@/components/FlowerDivider";
 
 export default function HomePage() {
   return (
@@ -25,14 +24,11 @@ export default function HomePage() {
       <main>
         <Hero />
         <AboutTeaser />
-        <FlowerDivider />
         <ChooseExperience />
         <Services />
-        <FlowerDivider />
         <ShopPreview />
         <Tutorials />
         <FeaturedCollaborations />
-        <FlowerDivider />
         <FAQ />
         <Policies />
         <BookingCTA />

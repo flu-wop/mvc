@@ -62,11 +62,6 @@ export default function Footer() {
 
   return (
     <footer ref={ref} className="relative bg-charcoal border-t border-border">
-      <div className="flex items-center justify-center pt-8 pb-2">
-        <div className="relative w-16 h-28 sm:w-20 sm:h-36 rotate-90 sm:rotate-0 opacity-70">
-          <Image src="/images/floral-motif.png" alt="" fill className="object-contain" />
-        </div>
-      </div>
       {/* VIP Newsletter */}
       <div className="border-b border-border">
         <div className="max-w-2xl mx-auto px-5 md:px-8 py-14 text-center">
@@ -143,31 +138,41 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Hours */}
-          <div>
-            <p className="text-white text-xs font-semibold tracking-[0.15em] uppercase mb-4">
-              Business Hours
-            </p>
-            <p className="text-white/60 text-sm">9:00 AM – 6:00 PM</p>
-            <p className="text-white/60 text-sm mb-2">Monday – Saturday</p>
-            <p className="text-white/40 text-sm">Closed Sunday</p>
-          </div>
+          {/* Hours + Contact, paired with floral divider between them */}
+          <div className="relative grid grid-cols-2 gap-6 md:col-span-2">
+            <div>
+              <p className="text-white text-xs font-semibold tracking-[0.15em] uppercase mb-4">
+                Business Hours
+              </p>
+              <p className="text-white/60 text-sm">9:00 AM – 6:00 PM</p>
+              <p className="text-white/60 text-sm mb-2">Monday – Saturday</p>
+              <p className="text-white/40 text-sm">Closed Sunday</p>
+            </div>
 
-          {/* Contact */}
-          <div>
-            <p className="text-white text-xs font-semibold tracking-[0.15em] uppercase mb-4">
-              Contact
-            </p>
-            <div className="flex flex-col gap-3 text-sm text-white/60">
-              <a href="tel:5043032763" className="flex items-center gap-2 hover:text-gold transition-colors">
-                <Phone className="w-4 h-4 text-gold shrink-0" /> (504) 303-2763
-              </a>
-              <a href="mailto:mvcxreations@gmail.com" className="flex items-center gap-2 hover:text-gold transition-colors">
-                <Mail className="w-4 h-4 text-gold shrink-0" /> mvcxreations@gmail.com
-              </a>
-              <span className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-gold shrink-0" /> Kenner, LA
-              </span>
+            <div>
+              <p className="text-white text-xs font-semibold tracking-[0.15em] uppercase mb-4">
+                Contact
+              </p>
+              <div className="flex flex-col gap-3 text-sm text-white/60">
+                <a href="tel:5043032763" className="flex items-center gap-2 hover:text-gold transition-colors">
+                  <Phone className="w-4 h-4 text-gold shrink-0" /> (504) 303-2763
+                </a>
+                <a href="mailto:mvcxreations@gmail.com" className="flex items-center gap-2 hover:text-gold transition-colors">
+                  <Mail className="w-4 h-4 text-gold shrink-0" /> mvcxreations@gmail.com
+                </a>
+                <span className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-gold shrink-0" /> Kenner, LA
+                </span>
+              </div>
+            </div>
+
+            {/* Floral divider — desktop/landscape only, hidden on narrow mobile portrait */}
+            <div className="hidden md:flex absolute left-1/2 top-0 bottom-0 -translate-x-1/2 flex-col items-center">
+              <div className="w-px flex-1 bg-border" />
+              <div className="relative w-6 h-11 my-1 opacity-70 shrink-0">
+                <Image src="/images/floral-motif.png" alt="" fill className="object-contain" />
+              </div>
+              <div className="w-px flex-1 bg-border" />
             </div>
           </div>
 
