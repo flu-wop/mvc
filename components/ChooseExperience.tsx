@@ -39,7 +39,7 @@ export default function ChooseExperience() {
             Choose Your Experience
           </h2>
           <p className="text-grey text-sm mt-3 max-w-md mx-auto">
-            Shop premium press-ons &amp; other nail products, or book your next appointment.
+            Shop premium press-ons &amp; nail products or book your next appointment with Margie.
           </p>
         </div>
 

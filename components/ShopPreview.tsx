@@ -5,10 +5,10 @@ import { motion, useInView } from "framer-motion";
 import Link from "next/link";
 
 const available = [
-  { name: "Press-Ons", desc: "Custom and ready-to-wear luxury press-on sets. Perfectly sized, beautifully finished, and made to last." },
+  { name: "Press Ons", desc: "Custom and ready-to-wear luxury press-on sets. Perfectly sized, beautifully finished, and made to last." },
   { name: "Cuticle Oils", desc: "Nourishing blends that keep cuticles soft, hydrated, and healthy between sets." },
   { name: "Soak Off Kits", desc: "Everything you need for gentle, damage-free removal at home." },
-  { name: "Press-On Nail Extras", desc: "Glue, adhesive tabs, files, and finishing essentials to perfect your application and wear." },
+  { name: "Press On Nail Extras", desc: "Glue, adhesive tabs, files, and finishing essentials to perfect your application and wear." },
 ];
 
 const comingSoon = [

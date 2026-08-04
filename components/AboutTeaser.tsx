@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 
 const fadeLeft = {
   hidden: { opacity: 0, x: -32 },
@@ -64,9 +65,16 @@ export default function AboutTeaser() {
               <p className="text-grey">Travel appointments available on request.</p>
             </div>
 
-            <p className="text-gold text-lg" style={{ fontFamily: "var(--font-script)" }}>
+            <p className="text-gold text-lg mb-6" style={{ fontFamily: "var(--font-script)" }}>
               xo, Margie
             </p>
+
+            <Link
+              href="/shop"
+              className="inline-flex items-center gap-2 px-7 py-3 rounded-full border border-gold/40 text-gold text-sm font-semibold hover:bg-gold/10 transition-all duration-300"
+            >
+              Shop All My Products
+            </Link>
           </motion.div>
         </div>
       </div>

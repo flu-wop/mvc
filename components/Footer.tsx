@@ -60,7 +60,7 @@ export default function Footer() {
               />
             </span>
             <p className="text-white/45 text-sm leading-relaxed mt-4 mb-5 max-w-xs">
-              Licensed nail technician based in Kenner, near MSY. Book below.
+              Kenner, LA · Near MSY Airport · Travel appointments available
             </p>
             <div className="flex items-center gap-3">
               {socials.map((s) => {

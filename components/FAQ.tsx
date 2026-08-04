@@ -7,34 +7,34 @@ import { ChevronDown } from "lucide-react";
 const pressOnFaqs = [
   {
     q: "How do I find my size?",
-    a: "Measure the width of each of your natural nails at the widest point, or use the sizing chart included with every set. A sizing kit is also available if you'd like extra certainty before ordering a full custom set.",
+    a: "Use our size guide (or a simple measuring method): measure the width of each of your natural nails at the widest point, or use the sizing chart included with every set. We also offer a sizing kit if you'd like extra certainty before ordering a full custom set.",
   },
   {
     q: "How do I apply and remove them?",
-    a: "Apply: gently push back cuticles, lightly buff the nail surface, clean with alcohol, select the correct size, apply a thin layer of glue (or adhesive tabs), press and hold for 20–30 seconds, then finish with cuticle oil. Remove: soak in warm soapy water or use the soak-off method with acetone (or a Soak Off Kit). Never force them off — this protects your natural nails.",
+    a: "Apply: Gently push back cuticles, lightly buff the nail surface, clean with alcohol, select the correct size, apply a thin layer of glue (or adhesive tabs), press and hold for 20–30 seconds. Finish with cuticle oil. Remove: Soak in warm soapy water or use the soak-off method with acetone (or our Soak Off Kits). Never force them off — this protects your natural nails.",
   },
   {
-    q: "Are the press-ons reusable?",
+    q: "Are our press-ons reusable?",
     a: "Yes. With proper application and gentle removal, most sets can be worn multiple times. Store them in the case provided and keep the nail beds clean for best results.",
   },
   {
-    q: "What's the refund / exchange policy?",
-    a: "Because each set is custom or hygiene-sensitive, worn press-ons aren't eligible for return. If your set arrives damaged or the wrong size due to an error on our end, reach out within 7 days and it'll be made right.",
+    q: "What is the refund / exchange policy for press-ons?",
+    a: "Because each set is custom or hygiene-sensitive, we do not offer returns on worn press-ons. If your set arrives damaged or the wrong size due to an error on our end, contact us within 7 days and we'll make it right.",
   },
   {
     q: "Do you ship in the U.S.?",
-    a: "Yes — shipping is currently within the United States. Shipping times and rates are calculated at checkout.",
+    a: "Yes — we currently ship within the United States. Shipping times and rates are calculated at checkout.",
   },
 ];
 
 const serviceFaqs = [
   {
-    q: "What's your deposit and cancellation policy?",
+    q: "What is your deposit and cancellation policy?",
     a: "A $30 non-refundable deposit is required to secure your appointment. Cancellations or reschedules need at least 24 hours' notice. Late arrivals have a 10-minute grace period.",
   },
   {
     q: "What should I know before my appointment?",
-    a: "Arrive 10 minutes early. Come with clean, polish-free nails if possible, and let Margie know about any allergies or preferences in advance. Travel appointments are available on request for an additional fee.",
+    a: "Please arrive 10 minutes early. Come with clean, polish-free nails if possible. Let me know about any allergies or preferences in advance. Travel appointments are available on request (additional fee).",
   },
   {
     q: "Do you offer refunds on services?",
@@ -42,7 +42,7 @@ const serviceFaqs = [
   },
   {
     q: "Where are you located?",
-    a: "Based in Kenner, Louisiana — conveniently near MSY Airport. Travel appointments are available upon request.",
+    a: "Based in Kenner, Louisiana — conveniently near MSY airport. Travel appointments available upon request.",
   },
 ];
 
