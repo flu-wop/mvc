@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { MapPin, Phone, Mail } from "lucide-react";
 
@@ -39,15 +39,72 @@ const socials = [
 export default function Footer() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email) return;
+    setStatus("loading");
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) throw new Error();
+      setStatus("done");
+      setEmail("");
+    } catch {
+      setStatus("error");
+    }
+  }
 
   return (
     <footer ref={ref} className="relative bg-charcoal border-t border-border">
+      {/* VIP Newsletter */}
+      <div className="border-b border-border">
+        <div className="max-w-2xl mx-auto px-5 md:px-8 py-14 text-center">
+          <h3 className="text-3xl md:text-4xl mb-3" style={{ fontFamily: "var(--font-script)" }}>
+            Stay in the Loop &amp; Join the MVC VIP List
+          </h3>
+          <p className="text-white/50 text-sm mb-6 max-w-md mx-auto">
+            Be the first to know about new collections, product launches, exclusive offers,
+            and appointment openings.
+          </p>
+          {status === "done" ? (
+            <p className="text-gold text-sm font-medium">You&apos;re on the list — thank you!</p>
+          ) : (
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter Your Email Address"
+                className="flex-1 px-5 py-3 rounded-full bg-white/5 border border-border text-white text-sm placeholder:text-grey focus:outline-none focus:border-gold/50"
+              />
+              <button
+                type="submit"
+                disabled={status === "loading"}
+                className="px-7 py-3 rounded-full bg-gold text-ink font-semibold text-sm hover:bg-gold-light transition-all duration-300 disabled:opacity-60"
+              >
+                {status === "loading" ? "Joining..." : "Join the List Now"}
+              </button>
+            </form>
+          )}
+          {status === "error" && (
+            <p className="text-red-400 text-xs mt-3">Something went wrong — please try again.</p>
+          )}
+        </div>
+      </div>
+
       <div className="max-w-6xl mx-auto px-5 md:px-8 py-16">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="grid sm:grid-cols-2 md:grid-cols-3 gap-10 mb-12"
+          className="grid sm:grid-cols-2 md:grid-cols-4 gap-10 mb-12"
         >
           {/* Brand */}
           <div>
@@ -106,6 +163,21 @@ export default function Footer() {
               <span className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-gold shrink-0" /> Kenner, LA
               </span>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <p className="text-white text-xs font-semibold tracking-[0.15em] uppercase mb-4">
+              Quick Links
+            </p>
+            <div className="flex flex-col gap-2.5 text-sm text-white/60">
+              <Link href="/about" className="hover:text-gold transition-colors w-fit">About</Link>
+              <Link href="/#services" className="hover:text-gold transition-colors w-fit">Services</Link>
+              <Link href="/shop" className="hover:text-gold transition-colors w-fit">Shop</Link>
+              <Link href="/content-creation" className="hover:text-gold transition-colors w-fit">Content Creation</Link>
+              <Link href="/portfolio" className="hover:text-gold transition-colors w-fit">Portfolio</Link>
+              <Link href="/faq" className="hover:text-gold transition-colors w-fit">FAQ</Link>
             </div>
           </div>
         </motion.div>

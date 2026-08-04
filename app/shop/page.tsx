@@ -1,13 +1,15 @@
-// TODO: Build out /shop with full Shopify Storefront API integration
-// Use @shopify/hydrogen or custom fetch to load collections & products
-import Link from "next/link";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import ShopPreview from "@/components/ShopPreview";
+
 export default function ShopPage() {
   return (
-    <main className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center text-white px-6 text-center">
-      <p className="text-[#C9A356] text-xs font-semibold tracking-widest uppercase mb-4">Coming Soon</p>
-      <h1 className="text-5xl font-bold mb-4" style={{ fontFamily: "var(--font-playfair)" }}>Shop</h1>
-      <p className="text-white/50 mb-8">This page is under construction.</p>
-      <Link href="/" className="px-6 py-3 rounded-full bg-[#C9A356] text-white font-semibold text-sm hover:bg-[#C9A356]/90 transition-all">← Back to Home</Link>
-    </main>
+    <>
+      <Navbar />
+      <main className="min-h-screen bg-ink pt-24">
+        <ShopPreview />
+      </main>
+      <Footer />
+    </>
   );
 }

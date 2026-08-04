@@ -59,10 +59,10 @@ export default function Hero() {
           initial="hidden"
           animate="show"
           custom={0.15}
-          className="relative w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 mx-auto mb-2"
+          className="relative h-24 sm:h-28 md:h-32 mx-auto mb-4"
         >
           <Image
-            src="/images/logo-ornate.png"
+            src="/images/logo-white.png"
             alt="MVC Creations"
             fill
             className="object-contain"
@@ -77,7 +77,7 @@ export default function Hero() {
           custom={0.3}
           className="text-gold text-sm md:text-base tracking-widest uppercase mb-10"
         >
-          Kenner, LA · Near MSY Airport
+          Where Beauty Meets Artistry
         </motion.p>
 
         <motion.div
@@ -88,16 +88,16 @@ export default function Hero() {
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
           <Link
-            href="#booking"
+            href="#choose"
             className="px-8 py-4 rounded-full bg-gold text-ink font-semibold text-base transition-all duration-300 hover:bg-gold-light hover:scale-105 active:scale-95"
           >
-            Book Appointment
+            Choose Your Experience
           </Link>
           <Link
             href="/shop"
             className="px-8 py-4 rounded-full border border-white/30 text-white font-medium text-base transition-all duration-300 hover:border-silver hover:text-silver"
           >
-            Shop Online
+            Shop Premium Online
           </Link>
         </motion.div>
       </div>

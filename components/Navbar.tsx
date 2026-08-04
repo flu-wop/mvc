@@ -6,10 +6,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
 const navLinks = [
-  { label: "Services", href: "#services" },
-  { label: "Meet Margie", href: "#about" },
+  { label: "About", href: "/about" },
+  { label: "Services", href: "/#services" },
+  { label: "Press-Ons", href: "/press-ons" },
   { label: "Shop", href: "/shop" },
-  { label: "Policies", href: "#policies" },
+  { label: "Content Creation", href: "/content-creation" },
+  { label: "Portfolio", href: "/portfolio" },
+  { label: "FAQ", href: "/faq" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export default function Navbar() {
@@ -36,7 +40,7 @@ export default function Navbar() {
           <span className="text-white">MVC Creations</span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden lg:flex items-center gap-5 text-sm">
           {navLinks.map((link) => (
             <Link
               key={link.label}
@@ -48,7 +52,7 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-3">
           <Link
             href="#booking"
             className="px-5 py-2.5 rounded-full text-sm font-semibold bg-gold text-ink hover:bg-gold-light transition-all duration-200 active:scale-95"
@@ -59,7 +63,7 @@ export default function Navbar() {
 
         <button
           onClick={() => setOpen(!open)}
-          className="md:hidden text-white p-1"
+          className="lg:hidden text-white p-1"
           aria-label="Toggle menu"
         >
           {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -73,7 +77,7 @@ export default function Navbar() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="md:hidden bg-ink/98 backdrop-blur-xl border-t border-border overflow-hidden"
+            className="lg:hidden bg-ink/98 backdrop-blur-xl border-t border-border overflow-hidden"
           >
             <nav className="flex flex-col px-6 py-6 gap-5">
               {navLinks.map((link) => (

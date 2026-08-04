@@ -1,12 +1,18 @@
-// TODO: Build out /gallery with full masonry grid, lightbox, and Instagram feed embed
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import Link from "next/link";
+
 export default function GalleryPage() {
   return (
-    <main className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center text-white px-6 text-center">
-      <p className="text-[#C9A356] text-xs font-semibold tracking-widest uppercase mb-4">Coming Soon</p>
-      <h1 className="text-5xl font-bold mb-4" style={{ fontFamily: "var(--font-playfair)" }}>Gallery</h1>
-      <p className="text-white/50 mb-8">This page is under construction.</p>
-      <Link href="/" className="px-6 py-3 rounded-full bg-[#C9A356] text-white font-semibold text-sm hover:bg-[#C9A356]/90 transition-all">← Back to Home</Link>
-    </main>
+    <>
+      <Navbar />
+      <main className="min-h-screen bg-ink flex flex-col items-center justify-center text-white px-6 text-center pt-24">
+        <p className="text-gold text-xs font-semibold tracking-widest uppercase mb-4">Coming Soon</p>
+        <h1 className="text-5xl mb-4" style={{ fontFamily: "var(--font-script)" }}>Gallery</h1>
+        <p className="text-white/50 mb-8">This page is under construction.</p>
+        <Link href="/" className="px-6 py-3 rounded-full bg-gold text-ink font-semibold text-sm hover:bg-gold-light transition-all">← Back to Home</Link>
+      </main>
+      <Footer />
+    </>
   );
 }

@@ -12,7 +12,6 @@ import ShopPreview from "@/components/ShopPreview";
 import Tutorials from "@/components/Tutorials";
 import FAQ from "@/components/FAQ";
 import Policies from "@/components/Policies";
-import Newsletter from "@/components/Newsletter";
 import BookingCTA from "@/components/BookingCTA";
 import Footer from "@/components/Footer";
 import FlowerDivider from "@/components/FlowerDivider";
@@ -34,7 +33,6 @@ export default function HomePage() {
         <FlowerDivider />
         <FAQ />
         <Policies />
-        <Newsletter />
         <BookingCTA />
       </main>
 
