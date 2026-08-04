@@ -167,12 +167,11 @@ export default function Footer() {
             </div>
 
             {/* Floral divider — desktop/landscape only, hidden on narrow mobile portrait */}
-            <div className="hidden md:flex absolute left-1/2 top-0 bottom-0 -translate-x-1/2 flex-col items-center">
-              <div className="w-px flex-1 bg-border" />
-              <div className="relative w-6 h-11 my-1 opacity-70 shrink-0">
+            <div className="hidden md:block absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-8">
+              <div className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-border" />
+              <div className="relative w-full h-full opacity-80">
                 <Image src="/images/floral-motif.png" alt="" fill className="object-contain" />
               </div>
-              <div className="w-px flex-1 bg-border" />
             </div>
           </div>
 

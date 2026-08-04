@@ -64,21 +64,22 @@ function FlipCard({ service, accent }: { service: (typeof services)[number]; acc
         animate={{ rotateY: flipped ? 180 : 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       >
-        {/* Front — full-bleed image */}
+        {/* Front — half-moon image + title below */}
         <div
-          className={`absolute inset-0 rounded-2xl overflow-hidden border-2 ${accent}`}
+          className="absolute inset-0 rounded-2xl overflow-hidden border border-border bg-white/[0.02] flex flex-col items-center pt-6 px-5 pb-5"
           style={{ backfaceVisibility: "hidden" }}
         >
-          <Image src={service.image} alt={service.title} fill className="object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-5 flex items-end justify-between">
-            <div>
-              <p className="text-white text-lg font-semibold" style={{ fontFamily: "var(--font-playfair)" }}>
-                {service.title}
-              </p>
-              <p className="text-white/70 text-xs">From ${service.from}</p>
-            </div>
-            <RotateCw className="w-4 h-4 text-white/50" />
+          <div className={`relative w-full flex-1 overflow-hidden rounded-t-[999px] border-2 mb-4 ${accent}`}>
+            <Image src={service.image} alt={service.title} fill className="object-cover" />
+          </div>
+          <div className="text-center">
+            <p className="text-white text-base font-semibold" style={{ fontFamily: "var(--font-playfair)" }}>
+              {service.title}
+            </p>
+            <p className="text-grey text-xs mb-1">From ${service.from}</p>
+            <p className="flex items-center justify-center gap-1 text-gold text-[11px] font-semibold">
+              <RotateCw className="w-3 h-3" /> Tap for details
+            </p>
           </div>
         </div>
 

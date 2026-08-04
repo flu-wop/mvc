@@ -35,6 +35,7 @@ const config: Config = {
         display: ["var(--font-playfair)", "Georgia", "serif"],
         script: ["var(--font-script)", "cursive"],
         body: ["var(--font-dm-sans)", "sans-serif"],
+        montserrat: ["var(--font-montserrat)", "sans-serif"],
       },
       animation: {
         shimmer: "shimmer 2.5s linear infinite",
