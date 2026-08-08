@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { RotateCw } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 const services = [
   {
@@ -48,53 +48,54 @@ const cardVariant = {
   show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } },
 };
 
-function FlipCard({ service, accent }: { service: (typeof services)[number]; accent: string }) {
-  const [flipped, setFlipped] = useState(false);
+function RevealCard({ service, accent }: { service: (typeof services)[number]; accent: string }) {
+  const [open, setOpen] = useState(false);
 
   return (
     <motion.div
       variants={cardVariant}
-      className="relative aspect-[4/5] cursor-pointer"
-      style={{ perspective: 1200 }}
-      onClick={() => setFlipped((f) => !f)}
+      className="relative aspect-[2/3] cursor-pointer rounded-2xl border border-border bg-white/[0.02] overflow-hidden flex flex-col items-center pt-6 px-5 pb-5"
+      style={{ perspective: 1000 }}
+      onClick={() => setOpen((o) => !o)}
+      whileHover={{ rotateX: -3, rotateY: 3 }}
+      animate={{ rotateX: open ? -4 : 0, rotateY: open ? 4 : 0 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
     >
-      <motion.div
-        className="relative w-full h-full"
-        style={{ transformStyle: "preserve-3d" }}
-        animate={{ rotateY: flipped ? 180 : 0 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {/* Front — half-moon image + title below */}
-        <div
-          className="absolute inset-0 rounded-2xl overflow-hidden border border-border bg-white/[0.02] flex flex-col items-center pt-6 px-5 pb-5"
-          style={{ backfaceVisibility: "hidden" }}
-        >
-          <div className={`relative w-full flex-1 overflow-hidden rounded-t-[999px] border-2 mb-4 ${accent}`}>
-            <Image src={service.image} alt={service.title} fill className="object-cover" />
-          </div>
-          <div className="text-center">
-            <p className="text-white text-base font-semibold" style={{ fontFamily: "var(--font-playfair)" }}>
-              {service.title}
-            </p>
-            <p className="text-grey text-xs mb-1">From ${service.from}</p>
-            <p className="flex items-center justify-center gap-1 text-gold text-[11px] font-semibold">
-              <RotateCw className="w-3 h-3" /> Tap for details
-            </p>
-          </div>
-        </div>
+      <div className={`relative w-full flex-1 overflow-hidden rounded-t-[999px] border-2 mb-4 ${accent}`}>
+        <Image src={service.image} alt={service.title} fill className="object-cover" />
 
-        {/* Back — description */}
-        <div
-          className={`absolute inset-0 rounded-2xl overflow-hidden border-2 ${accent} bg-charcoal p-6 flex flex-col justify-center text-center`}
-          style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
-        >
-          <p className="text-white text-lg font-semibold mb-1" style={{ fontFamily: "var(--font-playfair)" }}>
-            {service.title}
-          </p>
-          <p className="text-gold text-xs mb-4">From ${service.from}</p>
-          <p className="text-white/65 text-sm leading-relaxed">{service.full}</p>
-        </div>
-      </motion.div>
+        {/* Ombré blur reveal panel */}
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 30 }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute inset-0 flex items-end justify-center p-5"
+              style={{
+                backdropFilter: "blur(14px)",
+                WebkitMaskImage: "linear-gradient(to bottom, transparent, black 35%)",
+                maskImage: "linear-gradient(to bottom, transparent, black 35%)",
+                background:
+                  "linear-gradient(to bottom, transparent, rgba(10,10,10,0.75) 45%, rgba(10,10,10,0.92) 100%)",
+              }}
+            >
+              <p className="text-white/85 text-xs leading-relaxed text-center">{service.full}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <div className="text-center">
+        <p className="text-white text-base font-semibold" style={{ fontFamily: "var(--font-playfair)" }}>
+          {service.title}
+        </p>
+        <p className="text-grey text-xs mb-1">From ${service.from}</p>
+        <p className="flex items-center justify-center gap-1 text-gold text-[11px] font-semibold">
+          <Sparkles className="w-3 h-3" /> {open ? "Tap to close" : "Tap for details"}
+        </p>
+      </div>
     </motion.div>
   );
 }
@@ -122,7 +123,7 @@ export default function Services() {
         >
           {services.map((service, i) => {
             const accent = i % 2 === 0 ? "border-gold/40" : "border-silver/40";
-            return <FlipCard key={service.title} service={service} accent={accent} />;
+            return <RevealCard key={service.title} service={service} accent={accent} />;
           })}
         </motion.div>
 

@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb, initDb } from "@/lib/db";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
+  const ok = await rateLimit(`newsletter:${clientIp(req)}`, 5, 600); // 5 per 10 min
+  if (!ok) return new NextResponse("Too many requests", { status: 429 });
+
   const { email } = await req.json();
 
-  if (!email || typeof email !== "string" || !/^\S+@\S+\.\S+$/.test(email)) {
+  if (!email || typeof email !== "string" || email.length > 200 || !/^\S+@\S+\.\S+$/.test(email)) {
     return NextResponse.json({ error: "Invalid email" }, { status: 400 });
   }
 

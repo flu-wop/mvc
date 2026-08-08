@@ -21,11 +21,14 @@ export async function POST(req: Request) {
     const m = s.metadata || {};
     await initDb();
     const db = getDb();
-    await db.execute({
-      sql: `INSERT INTO orders (email, items_json, amount_cents, stripe_session_id, status)
+    const r = await db.execute({
+      sql: `INSERT OR IGNORE INTO orders (email, items_json, amount_cents, stripe_session_id, status)
             VALUES (?, ?, ?, ?, 'paid')`,
       args: [m.email, m.items_json, Number(m.amount_cents), s.id],
     });
+    if (r.rowsAffected === 0) {
+      return NextResponse.json({ received: true, duplicate: true });
+    }
     // TODO: send order confirmation email via Resend once RESEND_API_KEY is set up
   }
 

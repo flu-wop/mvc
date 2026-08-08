@@ -15,7 +15,7 @@ export default function AboutPage() {
             Meet the Artist
           </h1>
 
-          <div className="relative aspect-[4/5] max-w-sm mx-auto rounded-t-[999px] overflow-hidden border border-border mb-10">
+          <div className="relative aspect-[2/3] max-w-sm mx-auto rounded-t-[999px] overflow-hidden border border-border mb-10">
             <Image
               src="/images/margie-portrait.jpg"
               alt="Margie, founder of MVC Creations"
@@ -41,11 +41,6 @@ export default function AboutPage() {
               stories in an authentic way. Whether I&apos;m designing a custom nail set or
               capturing content that showcases a business, my goal is always the same — to
               create beautiful experiences that leave a lasting impression.
-            </p>
-            <p>
-              At MVC Creations, beauty is about more than nails. It&apos;s about confidence,
-              self-care, creativity, and celebrating the little details that make you feel
-              your best.
             </p>
             <p>
               I&apos;m so grateful you&apos;re here, and I can&apos;t wait to welcome you into

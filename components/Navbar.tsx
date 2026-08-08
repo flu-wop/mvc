@@ -5,8 +5,16 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
-const navLinks = [
-  { label: "About", href: "/about" },
+const primaryNav = [
+  { label: "Services", href: "/#services" },
+  { label: "Shop", href: "/shop" },
+  { label: "Portfolio", href: "/portfolio" },
+  { label: "Content Creation", href: "/content-creation" },
+  { label: "FAQ", href: "/faq" },
+];
+
+const fullNav = [
+  { label: "Behind the Brand", href: "/about" },
   { label: "Services", href: "/#services" },
   { label: "Press-Ons", href: "/press-ons" },
   { label: "Shop", href: "/shop" },
@@ -41,7 +49,7 @@ export default function Navbar() {
         </Link>
 
         <nav className="hidden lg:flex items-center gap-5 text-sm">
-          {navLinks.map((link) => (
+          {primaryNav.map((link) => (
             <Link
               key={link.label}
               href={link.href}
@@ -80,7 +88,7 @@ export default function Navbar() {
             className="lg:hidden bg-ink/98 backdrop-blur-xl border-t border-border overflow-hidden"
           >
             <nav className="flex flex-col px-6 py-6 gap-5">
-              {navLinks.map((link) => (
+              {fullNav.map((link) => (
                 <Link
                   key={link.label}
                   href={link.href}

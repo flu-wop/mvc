@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { RotateCw } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 const available = [
   { name: "Press Ons", desc: "Custom and ready-to-wear luxury press-on sets. Perfectly sized, beautifully finished, and made to last." },
@@ -13,7 +13,7 @@ const available = [
 ];
 
 const comingSoon = [
-  "Custom Grabbers",
+  "Custom Card Grabbers",
   "Card Grabbers",
   "Lighters",
   "Stickers",
@@ -22,50 +22,50 @@ const comingSoon = [
   "Nail Growth Serum",
 ];
 
-function ProductFlipCard({ product, accent }: { product: (typeof available)[number]; accent: string }) {
-  const [flipped, setFlipped] = useState(false);
+function ProductRevealCard({ product, accent }: { product: (typeof available)[number]; accent: string }) {
+  const [open, setOpen] = useState(false);
 
   return (
-    <div
-      className="relative aspect-[4/5] cursor-pointer"
-      style={{ perspective: 1200 }}
-      onClick={() => setFlipped((f) => !f)}
+    <motion.div
+      className="relative aspect-[2/3] cursor-pointer rounded-2xl border border-border bg-white/[0.02] overflow-hidden flex flex-col"
+      style={{ perspective: 1000 }}
+      onClick={() => setOpen((o) => !o)}
+      whileHover={{ rotateX: -3, rotateY: 3 }}
+      animate={{ rotateX: open ? -4 : 0, rotateY: open ? 4 : 0 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
     >
-      <motion.div
-        className="relative w-full h-full"
-        style={{ transformStyle: "preserve-3d" }}
-        animate={{ rotateY: flipped ? 180 : 0 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {/* Front */}
-        <div
-          className="absolute inset-0 rounded-2xl overflow-hidden border border-border bg-white/[0.02] flex flex-col"
-          style={{ backfaceVisibility: "hidden" }}
-        >
-          <div className={`flex-1 m-4 mb-3 rounded-xl bg-white/5 border-2 border-dashed ${accent} flex items-center justify-center`}>
-            <span className="text-grey text-xs px-4 text-center">Product photo pending</span>
-          </div>
-          <div className="px-5 pb-5 text-center">
-            <p className="text-white font-semibold">{product.name}</p>
-            <p className="flex items-center justify-center gap-1 text-gold text-[11px] font-semibold mt-1">
-              <RotateCw className="w-3 h-3" /> Tap for details
-            </p>
-          </div>
-        </div>
+      <div className={`relative flex-1 m-4 mb-3 rounded-xl bg-white/5 border-2 border-dashed ${accent} flex items-center justify-center overflow-hidden`}>
+        <span className="text-grey text-xs px-4 text-center">Product photo pending</span>
 
-        {/* Back */}
-        <div
-          className={`absolute inset-0 rounded-2xl overflow-hidden border-2 ${accent} bg-charcoal p-6 flex flex-col justify-center text-center`}
-          style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
-        >
-          <p className="text-white text-lg font-semibold mb-1" style={{ fontFamily: "var(--font-playfair)" }}>
-            {product.name}
-          </p>
-          <p className="text-grey text-xs italic mb-4">Price pending</p>
-          <p className="text-white/65 text-sm leading-relaxed">{product.desc}</p>
-        </div>
-      </motion.div>
-    </div>
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 30 }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute inset-0 flex items-end justify-center p-4"
+              style={{
+                backdropFilter: "blur(14px)",
+                WebkitMaskImage: "linear-gradient(to bottom, transparent, black 35%)",
+                maskImage: "linear-gradient(to bottom, transparent, black 35%)",
+                background:
+                  "linear-gradient(to bottom, transparent, rgba(10,10,10,0.75) 45%, rgba(10,10,10,0.92) 100%)",
+              }}
+            >
+              <p className="text-white/85 text-xs leading-relaxed text-center">{product.desc}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+      <div className="px-5 pb-5 text-center">
+        <p className="text-white font-semibold">{product.name}</p>
+        <p className="text-grey text-xs italic mb-1">Price pending</p>
+        <p className="flex items-center justify-center gap-1 text-gold text-[11px] font-semibold">
+          <Sparkles className="w-3 h-3" /> {open ? "Tap to close" : "Tap for details"}
+        </p>
+      </div>
+    </motion.div>
   );
 }
 
@@ -91,7 +91,7 @@ export default function ShopPreview() {
           className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 mb-14"
         >
           {available.map((p, i) => (
-            <ProductFlipCard key={p.name} product={p} accent={i % 2 === 0 ? "border-gold/40" : "border-silver/40"} />
+            <ProductRevealCard key={p.name} product={p} accent={i % 2 === 0 ? "border-gold/40" : "border-silver/40"} />
           ))}
         </motion.div>
 

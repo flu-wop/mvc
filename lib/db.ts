@@ -21,7 +21,7 @@ export async function initDb() {
       email TEXT NOT NULL,
       items_json TEXT NOT NULL,        -- JSON array of {name, qty, unit_amount_cents}
       amount_cents INTEGER NOT NULL,
-      stripe_session_id TEXT,
+      stripe_session_id TEXT UNIQUE,
       status TEXT DEFAULT 'pending',   -- pending | paid | cancelled
       created_at TEXT DEFAULT (datetime('now'))
     )
@@ -33,4 +33,8 @@ export async function initDb() {
       created_at TEXT DEFAULT (datetime('now'))
     )
   `);
+  // Safety net: if the orders table already existed before stripe_session_id was UNIQUE
+  await db.execute(
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_session ON orders(stripe_session_id)`
+  );
 }

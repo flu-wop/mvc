@@ -74,8 +74,22 @@ export default function ChooseExperience() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.55, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  e.currentTarget.style.setProperty("--x", `${e.clientX - rect.left}px`);
+                  e.currentTarget.style.setProperty("--y", `${e.clientY - rect.top}px`);
+                }}
                 className="group relative rounded-2xl overflow-hidden border border-border bg-white/[0.02] flex flex-col"
               >
+                {/* Cursor-follow glow */}
+                <div
+                  className="pointer-events-none absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{
+                    background: `radial-gradient(220px circle at var(--x, 50%) var(--y, 50%), ${
+                      card.accent === "gold" ? "rgba(201,163,86,0.18)" : "rgba(192,192,192,0.16)"
+                    }, transparent 70%)`,
+                  }}
+                />
                 {/* Elegant placeholder panel — no repeated photography */}
                 <div
                   className="relative aspect-[4/3] flex items-center justify-center overflow-hidden"

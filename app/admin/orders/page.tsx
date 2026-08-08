@@ -1,34 +1,78 @@
+import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getDb, initDb } from "@/lib/db";
+import { isAdminAuthed } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminOrders({ searchParams }: { searchParams: Promise<{ key?: string }> }) {
-  const params = await searchParams;
-  if (params.key !== process.env.ADMIN_PASSWORD) {
-    return <main style={{ padding: 40, fontFamily: "system-ui" }}>Unauthorized. Append <code>?key=YOUR_PASSWORD</code>.</main>;
+export default async function AdminOrders() {
+  if (!(await isAdminAuthed())) {
+    redirect("/admin/login");
   }
+
   await initDb();
   const db = getDb();
   const rows = (await db.execute("SELECT * FROM orders ORDER BY created_at DESC")).rows as any[];
+
   return (
-    <main style={{ padding: 40, fontFamily: "system-ui", color: "#F5F5F3", background: "#0A0A0A", minHeight: "100vh" }}>
-      <h1 style={{ color: "#C9A356" }}>Orders ({rows.length})</h1>
-      <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 24 }}>
-        <thead><tr style={{ textAlign: "left", color: "#9A9A9A" }}>
-          <th>Date</th><th>Email</th><th>Items</th><th>Total</th><th>Status</th>
-        </tr></thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.id} style={{ borderTop: "1px solid #2A2A2A" }}>
-              <td>{r.created_at}</td>
-              <td>{r.email}</td>
-              <td>{r.items_json}</td>
-              <td>${(r.amount_cents / 100).toFixed(2)}</td>
-              <td>{r.status}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <main className="min-h-screen bg-ink px-6 py-10 md:px-10">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <p className="text-gold text-xs font-semibold tracking-[0.2em] uppercase mb-1">
+              MVC Creations · Admin
+            </p>
+            <h1 className="text-white text-2xl font-semibold" style={{ fontFamily: "var(--font-playfair)" }}>
+              Orders ({rows.length})
+            </h1>
+          </div>
+          <Link href="/admin/system" className="text-grey text-sm hover:text-gold transition-colors">
+            System Health →
+          </Link>
+        </div>
+
+        <div className="rounded-2xl border border-border overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-grey border-b border-border">
+                <th className="px-4 py-3 font-medium">Date</th>
+                <th className="px-4 py-3 font-medium">Email</th>
+                <th className="px-4 py-3 font-medium">Items</th>
+                <th className="px-4 py-3 font-medium">Total</th>
+                <th className="px-4 py-3 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-grey">
+                    No orders yet.
+                  </td>
+                </tr>
+              )}
+              {rows.map((r) => (
+                <tr key={r.id} className="border-t border-border text-white/80">
+                  <td className="px-4 py-3 whitespace-nowrap">{r.created_at}</td>
+                  <td className="px-4 py-3">{r.email}</td>
+                  <td className="px-4 py-3 text-xs text-grey max-w-xs truncate">{r.items_json}</td>
+                  <td className="px-4 py-3">${(r.amount_cents / 100).toFixed(2)}</td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                        r.status === "paid"
+                          ? "bg-gold/15 text-gold"
+                          : "bg-white/10 text-grey"
+                      }`}
+                    >
+                      {r.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </main>
   );
 }

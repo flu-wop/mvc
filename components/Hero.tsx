@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
+import MarbleBackground from "./MarbleBackground";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -16,31 +17,7 @@ const fadeUp = {
 export default function Hero() {
   return (
     <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
-      {/* CSS marble background — no photo, so no risk of baked-in text */}
-      <motion.div
-        className="absolute inset-0 z-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 20% 10%, rgba(255,255,255,0.05), transparent 60%), " +
-            "radial-gradient(ellipse 70% 50% at 85% 90%, rgba(201,163,86,0.06), transparent 60%), " +
-            "radial-gradient(ellipse 60% 80% at 90% 15%, rgba(255,255,255,0.04), transparent 55%), " +
-            "linear-gradient(135deg, #0A0A0A 0%, #151515 40%, #0A0A0A 70%, #111111 100%)",
-          backgroundSize: "140% 140%",
-        }}
-        animate={{ backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] }}
-        transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-      >
-        {/* Fine vein streaks */}
-        <div
-          className="absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(115deg, transparent 0px, transparent 60px, rgba(255,255,255,0.6) 61px, transparent 63px, transparent 140px), " +
-              "repeating-linear-gradient(25deg, transparent 0px, transparent 90px, rgba(192,192,192,0.5) 91px, transparent 94px, transparent 200px)",
-          }}
-        />
-        <div className="absolute inset-0 bg-ink/35" />
-      </motion.div>
+      <MarbleBackground />
 
       {/* Content */}
       <div className="relative z-10 max-w-3xl mx-auto px-5 md:px-8 pt-20 pb-14 text-center">

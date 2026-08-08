@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -18,6 +18,8 @@ const fadeRight = {
 export default function AboutTeaser() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const parallaxY = useTransform(scrollYProgress, [0, 1], ["-6%", "6%"]);
 
   return (
     <section id="about" ref={ref} className="relative py-14 md:py-20 bg-ink">
@@ -30,13 +32,15 @@ export default function AboutTeaser() {
             animate={inView ? "show" : "hidden"}
             className="relative mx-auto md:mx-0 w-full max-w-sm"
           >
-            <div className="relative aspect-[4/5] rounded-t-[999px] overflow-hidden border border-border">
-              <Image
-                src="/images/margie-portrait.jpg"
-                alt="Margie, founder of MVC Creations"
-                fill
-                className="object-cover object-top"
-              />
+            <div className="relative aspect-[2/3] rounded-t-[999px] overflow-hidden border border-border">
+              <motion.div style={{ y: parallaxY }} className="absolute inset-0 -top-[8%] -bottom-[8%]">
+                <Image
+                  src="/images/margie-portrait.jpg"
+                  alt="Margie, founder of MVC Creations"
+                  fill
+                  className="object-cover object-top"
+                />
+              </motion.div>
             </div>
           </motion.div>
 

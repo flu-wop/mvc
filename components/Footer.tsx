@@ -96,6 +96,15 @@ export default function Footer() {
           {status === "error" && (
             <p className="text-red-400 text-xs mt-3">Something went wrong — please try again.</p>
           )}
+          {status !== "done" && (
+            <p className="text-grey text-xs mt-3">
+              No spam — just the good stuff. By joining you agree to our{" "}
+              <Link href="/privacy" className="hover:text-gold transition-colors underline">
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          )}
         </div>
       </div>
 
@@ -117,7 +126,9 @@ export default function Footer() {
               />
             </span>
             <p className="text-white/45 text-sm leading-relaxed mt-4 mb-5 max-w-xs">
-              Kenner, LA · Near MSY Airport · Travel appointments available
+              Kenner, LA
+              <br />
+              Travel appointments available
             </p>
             <div className="flex items-center gap-3">
               {socials.map((s) => {
@@ -169,7 +180,10 @@ export default function Footer() {
             {/* Floral divider — desktop/landscape only, hidden on narrow mobile portrait */}
             <div className="hidden md:block absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-8">
               <div className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-border" />
-              <div className="relative w-full h-full opacity-80">
+              <div
+                className="absolute left-1/2 top-0 h-full -translate-x-1/2 opacity-80"
+                style={{ aspectRatio: "258 / 461" }}
+              >
                 <Image src="/images/floral-motif.png" alt="" fill className="object-contain" />
               </div>
             </div>
@@ -193,7 +207,10 @@ export default function Footer() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-border">
           <p className="text-white/30 text-xs">
-            © {new Date().getFullYear()} MVC Creations · All rights reserved
+            © {new Date().getFullYear()} MVC Creations · All rights reserved ·{" "}
+            <Link href="/privacy" className="hover:text-gold transition-colors">
+              Privacy Policy
+            </Link>
           </p>
           <Link href="#booking" className="text-gold text-xs font-semibold hover:text-gold-light transition-colors">
             Book an appointment →

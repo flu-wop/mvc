@@ -145,7 +145,7 @@ const groups: { title: string; items: { q: string; a: string }[] }[] = [
       },
       {
         q: "How can I contact you?",
-        a: "Email, phone, Instagram, Facebook, TikTok, or the website contact form.",
+        a: "Email, phone, or the website contact form.",
       },
       {
         q: "Do you collaborate with brands?",
