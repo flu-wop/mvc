@@ -13,7 +13,6 @@ import Tutorials from "@/components/Tutorials";
 import FAQ from "@/components/FAQ";
 import Policies from "@/components/Policies";
 import FeaturedCollaborations from "@/components/FeaturedCollaborations";
-import BookingCTA from "@/components/BookingCTA";
 import Footer from "@/components/Footer";
 
 export default function HomePage() {
@@ -31,7 +30,6 @@ export default function HomePage() {
         <FeaturedCollaborations />
         <FAQ />
         <Policies />
-        <BookingCTA />
       </main>
 
       <Footer />

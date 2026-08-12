@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 
 const primaryNav = [
   { label: "Services", href: "/#services" },
+  { label: "Book", href: "/book" },
   { label: "Shop", href: "/shop" },
   { label: "Portfolio", href: "/portfolio" },
   { label: "Content Creation", href: "/content-creation" },
@@ -16,6 +17,7 @@ const primaryNav = [
 const fullNav = [
   { label: "Behind the Brand", href: "/about" },
   { label: "Services", href: "/#services" },
+  { label: "Book", href: "/book" },
   { label: "Press-Ons", href: "/press-ons" },
   { label: "Shop", href: "/shop" },
   { label: "Content Creation", href: "/content-creation" },
@@ -62,7 +64,7 @@ export default function Navbar() {
 
         <div className="hidden lg:flex items-center gap-3">
           <Link
-            href="#booking"
+            href="/book"
             className="px-5 py-2.5 rounded-full text-sm font-semibold bg-gold text-ink hover:bg-gold-light transition-all duration-200 active:scale-95"
           >
             Book Now
@@ -99,7 +101,7 @@ export default function Navbar() {
                 </Link>
               ))}
               <Link
-                href="#booking"
+                href="/book"
                 onClick={() => setOpen(false)}
                 className="inline-block mt-2 px-6 py-3 rounded-full text-sm font-semibold bg-gold text-ink w-full text-center hover:bg-gold-light transition-all"
               >

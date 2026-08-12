@@ -10,7 +10,7 @@ const cards = [
     title: "Luxury Nail Services",
     body: "Book luxury appointments.",
     cta: "Book Now",
-    href: "#booking",
+    href: "/book",
     icon: Calendar,
     accent: "gold",
   },
