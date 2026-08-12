@@ -108,7 +108,15 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-5 md:px-8 py-16">
+      <div className="max-w-6xl mx-auto px-5 md:px-8 pt-8">
+        <div className="flex justify-center mb-2">
+          <div className="relative w-14 h-32 opacity-70 rotate-90">
+            <Image src="/images/floral-motif.png" alt="" fill className="object-contain" />
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-5 md:px-8 pt-2 pb-16">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -149,8 +157,8 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Hours + Contact, paired with floral divider between them */}
-          <div className="relative grid grid-cols-2 gap-6 md:col-span-2">
+          {/* Hours + Contact */}
+          <div className="grid grid-cols-2 gap-6 md:col-span-2">
             <div>
               <p className="text-white text-xs font-semibold tracking-[0.15em] uppercase mb-4">
                 Business Hours
@@ -174,17 +182,6 @@ export default function Footer() {
                 <span className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-gold shrink-0" /> Kenner, LA
                 </span>
-              </div>
-            </div>
-
-            {/* Floral divider — desktop/landscape only, hidden on narrow mobile portrait */}
-            <div className="hidden md:block absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-8">
-              <div className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-border" />
-              <div
-                className="absolute left-1/2 top-0 h-full -translate-x-1/2 opacity-80"
-                style={{ aspectRatio: "258 / 461" }}
-              >
-                <Image src="/images/floral-motif.png" alt="" fill className="object-contain" />
               </div>
             </div>
           </div>
@@ -212,7 +209,7 @@ export default function Footer() {
               Privacy Policy
             </Link>
           </p>
-          <Link href="#booking" className="text-gold text-xs font-semibold hover:text-gold-light transition-colors">
+          <Link href="/book" className="text-gold text-xs font-semibold hover:text-gold-light transition-colors">
             Book an appointment →
           </Link>
         </div>
