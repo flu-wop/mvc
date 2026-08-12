@@ -26,9 +26,17 @@ export default async function AdminOrders() {
               Orders ({rows.length})
             </h1>
           </div>
-          <Link href="/admin/system" className="text-grey text-sm hover:text-gold transition-colors">
-            System Health →
-          </Link>
+          <div className="flex gap-5">
+            <Link href="/admin/bookings" className="text-grey text-sm hover:text-gold transition-colors">
+              Bookings →
+            </Link>
+            <Link href="/admin/inquiries" className="text-grey text-sm hover:text-gold transition-colors">
+              Inquiries →
+            </Link>
+            <Link href="/admin/system" className="text-grey text-sm hover:text-gold transition-colors">
+              System Health →
+            </Link>
+          </div>
         </div>
 
         <div className="rounded-2xl border border-border overflow-hidden">
