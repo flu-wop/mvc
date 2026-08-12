@@ -33,12 +33,12 @@ export default function AboutTeaser() {
             className="relative mx-auto md:mx-0 w-full max-w-sm"
           >
             <div className="relative aspect-[2/3] rounded-t-[999px] overflow-hidden border border-border">
-              <motion.div style={{ y: parallaxY }} className="absolute inset-0 -top-[8%] -bottom-[8%]">
+              <motion.div style={{ y: parallaxY }} className="absolute inset-0 -top-[4%] -bottom-[4%]">
                 <Image
                   src="/images/margie-portrait.jpg"
                   alt="Margie, founder of MVC Creations"
                   fill
-                  className="object-cover object-top"
+                  className="object-cover object-[center_15%]"
                 />
               </motion.div>
             </div>
