@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { getDb, initDb } from "@/lib/db";
 import { isAdminAuthed } from "@/lib/admin-auth";
 
@@ -17,27 +16,9 @@ export default async function AdminInquiries() {
   return (
     <main className="min-h-screen bg-ink px-6 py-10 md:px-10">
       <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <p className="text-gold text-xs font-semibold tracking-[0.2em] uppercase mb-1">
-              MVC Creations · Admin
-            </p>
-            <h1 className="text-white text-2xl font-semibold" style={{ fontFamily: "var(--font-playfair)" }}>
-              Content Inquiries ({rows.length})
-            </h1>
-          </div>
-          <div className="flex gap-5">
-            <Link href="/admin/bookings" className="text-grey text-sm hover:text-gold transition-colors">
-              Bookings →
-            </Link>
-            <Link href="/admin/orders" className="text-grey text-sm hover:text-gold transition-colors">
-              Orders →
-            </Link>
-            <Link href="/admin/system" className="text-grey text-sm hover:text-gold transition-colors">
-              System Health →
-            </Link>
-          </div>
-        </div>
+        <h1 className="text-white text-2xl font-semibold mb-8" style={{ fontFamily: "var(--font-playfair)" }}>
+          Content Inquiries ({rows.length})
+        </h1>
 
         <div className="rounded-2xl border border-border overflow-hidden overflow-x-auto">
           <table className="w-full text-sm">
@@ -78,9 +59,7 @@ export default async function AdminInquiries() {
                     <td className="px-4 py-3 text-xs max-w-[220px]">
                       {types.join(", ")}
                       {r.details && <div className="text-grey mt-1 line-clamp-3">{r.details}</div>}
-                      {r.instagram_or_site && (
-                        <div className="text-gold mt-1">{r.instagram_or_site}</div>
-                      )}
+                      {r.instagram_or_site && <div className="text-gold mt-1">{r.instagram_or_site}</div>}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">{r.budget_range || "—"}</td>
                     <td className="px-4 py-3 whitespace-nowrap">{r.timeline || "—"}</td>

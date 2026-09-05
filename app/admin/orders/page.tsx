@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { getDb, initDb } from "@/lib/db";
 import { isAdminAuthed } from "@/lib/admin-auth";
 
@@ -17,27 +16,9 @@ export default async function AdminOrders() {
   return (
     <main className="min-h-screen bg-ink px-6 py-10 md:px-10">
       <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <p className="text-gold text-xs font-semibold tracking-[0.2em] uppercase mb-1">
-              MVC Creations · Admin
-            </p>
-            <h1 className="text-white text-2xl font-semibold" style={{ fontFamily: "var(--font-playfair)" }}>
-              Orders ({rows.length})
-            </h1>
-          </div>
-          <div className="flex gap-5">
-            <Link href="/admin/bookings" className="text-grey text-sm hover:text-gold transition-colors">
-              Bookings →
-            </Link>
-            <Link href="/admin/inquiries" className="text-grey text-sm hover:text-gold transition-colors">
-              Inquiries →
-            </Link>
-            <Link href="/admin/system" className="text-grey text-sm hover:text-gold transition-colors">
-              System Health →
-            </Link>
-          </div>
-        </div>
+        <h1 className="text-white text-2xl font-semibold mb-8" style={{ fontFamily: "var(--font-playfair)" }}>
+          Orders ({rows.length})
+        </h1>
 
         <div className="rounded-2xl border border-border overflow-hidden">
           <table className="w-full text-sm">
@@ -67,9 +48,7 @@ export default async function AdminOrders() {
                   <td className="px-4 py-3">
                     <span
                       className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                        r.status === "paid"
-                          ? "bg-gold/15 text-gold"
-                          : "bg-white/10 text-grey"
+                        r.status === "paid" ? "bg-gold/15 text-gold" : "bg-white/10 text-grey"
                       }`}
                     >
                       {r.status}

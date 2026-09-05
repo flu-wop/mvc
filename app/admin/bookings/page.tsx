@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { getDb, initDb } from "@/lib/db";
 import { isAdminAuthed } from "@/lib/admin-auth";
 
@@ -17,29 +16,10 @@ export default async function AdminBookings() {
   return (
     <main className="min-h-screen bg-ink px-6 py-10 md:px-10">
       <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <p className="text-gold text-xs font-semibold tracking-[0.2em] uppercase mb-1">
-              MVC Creations · Admin
-            </p>
-            <h1 className="text-white text-2xl font-semibold" style={{ fontFamily: "var(--font-playfair)" }}>
-              Bookings ({rows.length})
-            </h1>
-          </div>
-          <div className="flex gap-5">
-            <Link href="/admin/orders" className="text-grey text-sm hover:text-gold transition-colors">
-              Orders →
-            </Link>
-            <Link href="/admin/inquiries" className="text-grey text-sm hover:text-gold transition-colors">
-              Inquiries →
-            </Link>
-            <Link href="/admin/system" className="text-grey text-sm hover:text-gold transition-colors">
-              System Health →
-            </Link>
-          </div>
-        </div>
-
-        <p className="text-grey text-xs mb-4">
+        <h1 className="text-white text-2xl font-semibold mb-2" style={{ fontFamily: "var(--font-playfair)" }}>
+          Bookings ({rows.length})
+        </h1>
+        <p className="text-grey text-xs mb-8">
           Subscribe to the live feed in Google/Apple Calendar:{" "}
           <span className="text-gold">/api/calendar.ics</span>
         </p>
