@@ -14,6 +14,7 @@ const links = [
   { label: "Portfolio", href: "/portfolio" },
   { label: "About", href: "/about" },
   { label: "FAQ", href: "/faq" },
+  { label: "Booking Card", href: "/card" },
   ...(SHOP_ENABLED ? [{ label: "Shop", href: "/shop" }] : []),
 ];
 
