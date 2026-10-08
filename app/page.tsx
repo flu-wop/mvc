@@ -34,7 +34,7 @@ export default async function HomePage() {
     telephone: BUSINESS.phone,
     sameAs: [BUSINESS.instagram, BUSINESS.facebook, BUSINESS.tiktok],
     address: { "@type": "PostalAddress", addressLocality: "Kenner", addressRegion: "LA", addressCountry: "US" },
-    image: `${SITE_URL}/images/og-image.jpg`,
+    image: `${SITE_URL}/images/og-logo.jpg`,
   };
 
   return (
