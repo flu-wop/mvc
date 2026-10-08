@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
+import { useState } from "react";
 import { MapPin, Phone, Mail } from "lucide-react";
+import InquiryModal from "./InquiryModal";
+import { BUSINESS } from "@/lib/site";
+import { SHOP_ENABLED } from "@/lib/features";
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
@@ -31,16 +33,24 @@ function FacebookIcon({ className }: { className?: string }) {
 }
 
 const socials = [
-  { label: "Instagram", href: "https://www.instagram.com/mvcxcreations", icon: InstagramIcon },
-  { label: "Facebook", href: "https://www.facebook.com/mvcxcreations", icon: FacebookIcon },
-  { label: "TikTok", href: "https://www.tiktok.com/@mvcxcreations", icon: TikTokIcon },
+  { label: "Instagram", href: BUSINESS.instagram, icon: InstagramIcon },
+  { label: "Facebook", href: BUSINESS.facebook, icon: FacebookIcon },
+  { label: "TikTok", href: BUSINESS.tiktok, icon: TikTokIcon },
+];
+
+const quickLinks = [
+  { label: "Services", href: "/#services" },
+  { label: "Portfolio", href: "/portfolio" },
+  { label: "About", href: "/about" },
+  { label: "FAQ", href: "/faq" },
+  { label: "Booking policies", href: "/policies" },
+  ...(SHOP_ENABLED ? [{ label: "Shop", href: "/shop" }] : []),
 ];
 
 export default function Footer() {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-40px" });
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [inquiryOpen, setInquiryOpen] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -61,19 +71,18 @@ export default function Footer() {
   }
 
   return (
-    <footer ref={ref} className="relative bg-charcoal border-t border-border">
-      {/* VIP Newsletter */}
+    <footer className="relative bg-charcoal border-t border-border pb-24 md:pb-0">
+      {/* VIP list */}
       <div className="border-b border-border">
         <div className="max-w-2xl mx-auto px-5 md:px-8 py-14 text-center">
-          <h3 className="text-3xl md:text-4xl mb-3" style={{ fontFamily: "var(--font-script)" }}>
-            Stay in the Loop &amp; Join the MVC VIP List
+          <h3 className="text-3xl md:text-4xl text-white mb-3 font-light" style={{ fontFamily: "var(--font-display)" }}>
+            Get first dibs on openings
           </h3>
           <p className="text-white/50 text-sm mb-6 max-w-md mx-auto">
-            Be the first to know about new collections, product launches, exclusive offers,
-            and appointment openings.
+            Join the MVC VIP list for new appointment times, seasonal sets and the occasional offer.
           </p>
           {status === "done" ? (
-            <p className="text-gold text-sm font-medium">You&apos;re on the list — thank you!</p>
+            <p className="text-gold text-sm font-medium">You&apos;re on the list. Thank you!</p>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
               <input
@@ -81,24 +90,23 @@ export default function Footer() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter Your Email Address"
+                placeholder="Email address"
+                aria-label="Email address"
                 className="flex-1 px-5 py-3 rounded-full bg-white/5 border border-border text-white text-sm placeholder:text-grey focus:outline-none focus:border-gold/50"
               />
               <button
                 type="submit"
                 disabled={status === "loading"}
-                className="px-7 py-3 rounded-full bg-gold text-ink font-semibold text-sm hover:bg-gold-light transition-all duration-300 disabled:opacity-60"
+                className="px-7 py-3 rounded-full border border-gold/50 text-gold text-xs font-semibold tracking-[0.18em] uppercase hover:bg-gold hover:text-ink transition-colors disabled:opacity-60"
               >
-                {status === "loading" ? "Joining..." : "Join the List Now"}
+                {status === "loading" ? "Joining..." : "Join"}
               </button>
             </form>
           )}
-          {status === "error" && (
-            <p className="text-red-400 text-xs mt-3">Something went wrong — please try again.</p>
-          )}
+          {status === "error" && <p className="text-red-400 text-xs mt-3">Something went wrong. Please try again.</p>}
           {status !== "done" && (
             <p className="text-grey text-xs mt-3">
-              No spam — just the good stuff. By joining you agree to our{" "}
+              No spam. By joining you agree to our{" "}
               <Link href="/privacy" className="hover:text-gold transition-colors underline">
                 Privacy Policy
               </Link>
@@ -108,33 +116,16 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-5 md:px-8 pt-8">
-        <div className="flex justify-center mb-2">
-          <div className="relative w-14 h-32 opacity-70 rotate-90">
-            <Image src="/images/floral-motif.png" alt="" fill className="object-contain" />
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-5 md:px-8 pt-2 pb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="grid sm:grid-cols-2 md:grid-cols-4 gap-10 mb-12"
-        >
-          {/* Brand */}
+      <div className="max-w-6xl mx-auto px-5 md:px-8 pt-14 pb-12">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-10 mb-12">
           <div>
-            <span className="relative block h-10 w-40 mb-1">
-              <Image
-                src="/images/logo-white.png"
-                alt="MVC Creations"
-                fill
-                className="object-contain object-left"
-              />
+            <span className="relative block h-12 w-32 mb-4">
+              <Image src="/images/logo-white.png" alt="MVC Creations" fill className="object-contain object-left" />
             </span>
-            <p className="text-white/45 text-sm leading-relaxed mt-4 mb-5 max-w-xs">
-              Kenner, LA
+            <p className="text-white/45 text-sm leading-relaxed mb-5">
+              {BUSINESS.city}
+              <br />
+              By appointment, Monday to Saturday
               <br />
               Travel appointments available
             </p>
@@ -148,7 +139,7 @@ export default function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={s.label}
-                    className="w-9 h-9 rounded-full bg-white/5 border border-border flex items-center justify-center text-white/50 hover:text-gold hover:border-gold/40 transition-all duration-200"
+                    className="w-10 h-10 rounded-full bg-white/5 border border-border flex items-center justify-center text-white/50 hover:text-gold hover:border-gold/40 transition-colors"
                   >
                     <Icon className="w-4 h-4" />
                   </a>
@@ -157,63 +148,50 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Hours + Contact */}
-          <div className="grid grid-cols-2 gap-6 md:col-span-2">
-            <div>
-              <p className="text-white text-xs font-semibold tracking-[0.15em] uppercase mb-4">
-                Business Hours
-              </p>
-              <p className="text-white/60 text-sm">9:00 AM – 6:00 PM</p>
-              <p className="text-white/60 text-sm mb-2">Monday – Saturday</p>
-              <p className="text-white/40 text-sm">Closed Sunday</p>
-            </div>
-
-            <div>
-              <p className="text-white text-xs font-semibold tracking-[0.15em] uppercase mb-4">
-                Contact
-              </p>
-              <div className="flex flex-col gap-3 text-sm text-white/60">
-                <a href="tel:5043032763" className="flex items-center gap-2 hover:text-gold transition-colors">
-                  <Phone className="w-4 h-4 text-gold shrink-0" /> (504) 303-2763
-                </a>
-                <a href="mailto:mvcxreations@gmail.com" className="flex items-center gap-2 hover:text-gold transition-colors">
-                  <Mail className="w-4 h-4 text-gold shrink-0" /> mvcxreations@gmail.com
-                </a>
-                <span className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-gold shrink-0" /> Kenner, LA
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Links */}
           <div>
-            <p className="text-white text-xs font-semibold tracking-[0.15em] uppercase mb-4">
-              Quick Links
-            </p>
-            <div className="flex flex-col gap-2.5 text-sm text-white/60">
-              <Link href="/about" className="hover:text-gold transition-colors w-fit">About</Link>
-              <Link href="/#services" className="hover:text-gold transition-colors w-fit">Services</Link>
-              <Link href="/shop" className="hover:text-gold transition-colors w-fit">Shop</Link>
-              <Link href="/content-creation" className="hover:text-gold transition-colors w-fit">Content Creation</Link>
-              <Link href="/portfolio" className="hover:text-gold transition-colors w-fit">Portfolio</Link>
-              <Link href="/faq" className="hover:text-gold transition-colors w-fit">FAQ</Link>
+            <p className="text-white text-[11px] font-medium tracking-[0.25em] uppercase mb-5">Contact</p>
+            <div className="flex flex-col gap-3 text-sm text-white/60">
+              <a href={BUSINESS.phoneHref} className="flex items-center gap-2 hover:text-gold transition-colors w-fit">
+                <Phone className="w-4 h-4 text-gold shrink-0" /> {BUSINESS.phone}
+              </a>
+              <a href={`mailto:${BUSINESS.email}`} className="flex items-center gap-2 hover:text-gold transition-colors w-fit">
+                <Mail className="w-4 h-4 text-gold shrink-0" /> {BUSINESS.email}
+              </a>
+              <span className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-gold shrink-0" /> {BUSINESS.city}
+              </span>
             </div>
           </div>
-        </motion.div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-border">
-          <p className="text-white/30 text-xs">
+          <div>
+            <p className="text-white text-[11px] font-medium tracking-[0.25em] uppercase mb-5">Explore</p>
+            <div className="flex flex-col gap-2.5 text-sm text-white/60">
+              {quickLinks.map((l) => (
+                <Link key={l.label} href={l.href} className="hover:text-gold transition-colors w-fit">
+                  {l.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-border">
+          <p className="text-white/30 text-xs text-center sm:text-left">
             © {new Date().getFullYear()} MVC Creations · All rights reserved ·{" "}
             <Link href="/privacy" className="hover:text-gold transition-colors">
               Privacy Policy
             </Link>
           </p>
-          <Link href="/book" className="text-gold text-xs font-semibold hover:text-gold-light transition-colors">
-            Book an appointment →
-          </Link>
+          <button
+            onClick={() => setInquiryOpen(true)}
+            className="text-xs text-white/40 hover:text-gold transition-colors underline underline-offset-4 decoration-white/15"
+          >
+            Brand &amp; content inquiries
+          </button>
         </div>
       </div>
+
+      <InquiryModal open={inquiryOpen} onClose={() => setInquiryOpen(false)} />
     </footer>
   );
 }

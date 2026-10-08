@@ -2,8 +2,11 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
+import { notFound } from "next/navigation";
+import { SHOP_ENABLED } from "@/lib/features";
 
 export default function ShopSuccessPage() {
+  if (!SHOP_ENABLED) notFound();
   return (
     <>
       <Navbar />

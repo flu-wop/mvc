@@ -1,40 +1,47 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
-import { SERVICES, DEPOSIT_CENTS, type Service } from "@/lib/services";
+import { useEffect, useMemo, useState } from "react";
+import { DEPOSIT_CENTS, formatDuration, formatPrice, type Service } from "@/lib/service-defaults";
 
 const inputClasses =
-  "w-full px-5 py-3 rounded-2xl bg-white/5 border border-border text-white text-sm placeholder:text-grey focus:outline-none focus:border-gold/50 transition-colors";
+  "w-full px-5 py-3.5 rounded-2xl bg-white/5 border border-border text-white text-sm placeholder:text-grey focus:outline-none focus:border-gold/60 transition-colors";
 
-function nextNDays(n: number): string[] {
-  const days: string[] = [];
-  const d = new Date();
-  for (let i = 0; i < n; i++) {
-    const day = new Date(d);
-    day.setDate(d.getDate() + i);
-    const iso = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(
-      day.getDate()
-    ).padStart(2, "0")}`;
-    days.push(iso);
-  }
-  return days;
+// Calendar-day math done on plain y/m/d so the browser's timezone never shifts
+// a date. `todayIso` comes from the server in the shop's timezone.
+function addDays(iso: string, n: number): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d + n));
+  return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, "0")}-${String(dt.getUTCDate()).padStart(2, "0")}`;
 }
 
-function formatDayLabel(iso: string): { weekday: string; day: string } {
-  const [y, mo, d] = iso.split("-").map(Number);
-  const date = new Date(y, mo - 1, d);
+function dayParts(iso: string) {
+  const [y, m, d] = iso.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
   return {
-    weekday: date.toLocaleDateString("en-US", { weekday: "short" }),
-    day: String(date.getDate()),
+    weekdayNum: dt.getUTCDay(),
+    weekday: dt.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" }),
+    day: String(d),
+    month: dt.toLocaleDateString("en-US", { month: "short", timeZone: "UTC" }),
+    long: dt.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" }),
   };
 }
 
-export default function BookingForm() {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [service, setService] = useState<Service | null>(null);
+export default function BookingForm({
+  services,
+  initialSlug,
+  todayIso,
+  closedWeekdays,
+}: {
+  services: Service[];
+  initialSlug?: string;
+  todayIso: string;
+  closedWeekdays: number[];
+}) {
+  const preselected = services.find((s) => s.slug === initialSlug) ?? null;
+  const [step, setStep] = useState<1 | 2 | 3>(preselected ? 2 : 1);
+  const [service, setService] = useState<Service | null>(preselected);
 
-  const days = nextNDays(21);
+  const days = useMemo(() => Array.from({ length: 28 }, (_, i) => addDays(todayIso, i)), [todayIso]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [slots, setSlots] = useState<string[]>([]);
   const [closed, setClosed] = useState(false);
@@ -48,19 +55,30 @@ export default function BookingForm() {
 
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [error, setError] = useState("");
+  const [refresh, setRefresh] = useState(0); // bump to re-fetch times after a 409
 
   useEffect(() => {
-    if (!selectedDate) return;
+    if (!selectedDate || !service) return;
+    let cancelled = false;
     setLoadingSlots(true);
     setSelectedTime(null);
-    fetch(`/api/availability?date=${selectedDate}`)
+    fetch(`/api/availability?date=${selectedDate}&service=${encodeURIComponent(service.slug)}`)
       .then((r) => r.json())
       .then((data) => {
+        if (cancelled) return;
         setSlots(data.slots || []);
         setClosed(!!data.closed);
       })
-      .finally(() => setLoadingSlots(false));
-  }, [selectedDate]);
+      .catch(() => {
+        if (cancelled) return;
+        setSlots([]);
+        setClosed(false);
+      })
+      .finally(() => !cancelled && setLoadingSlots(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedDate, service, refresh]);
 
   async function handleCheckout(e: React.FormEvent) {
     e.preventDefault();
@@ -85,6 +103,12 @@ export default function BookingForm() {
       if (!res.ok) {
         setError(data.error || "Something went wrong. Please try again.");
         setStatus("error");
+        if (res.status === 409) {
+          // Slot vanished: send them back to pick another.
+          setStep(2);
+          setSelectedTime(null);
+          setRefresh((n) => n + 1);
+        }
         return;
       }
       window.location.href = data.url;
@@ -94,95 +118,93 @@ export default function BookingForm() {
     }
   }
 
+  const deposit = service?.depositCents ?? DEPOSIT_CENTS;
+
   return (
     <div className="w-full max-w-2xl mx-auto px-6">
-      {/* Step indicator */}
-      <div className="flex items-center justify-center gap-2 mb-10">
+      <div className="flex items-center justify-center gap-2 mb-10" aria-hidden>
         {[1, 2, 3].map((n) => (
-          <div
-            key={n}
-            className={`h-1.5 rounded-full transition-all ${
-              step >= n ? "bg-gold w-8" : "bg-white/10 w-6"
-            }`}
-          />
+          <div key={n} className={`h-1 rounded-full transition-all ${step >= n ? "bg-gold w-10" : "bg-white/10 w-6"}`} />
         ))}
       </div>
 
       {step === 1 && (
         <div>
-          <p className="text-gold text-xs font-semibold tracking-widest uppercase mb-2 text-center">
-            Step 1
-          </p>
-          <h2 className="text-2xl md:text-3xl text-center mb-8" style={{ fontFamily: "var(--font-playfair)" }}>
+          <p className="text-gold text-[11px] font-medium tracking-[0.3em] uppercase mb-3 text-center">Step 1</p>
+          <h2 className="text-4xl text-center mb-8 font-light" style={{ fontFamily: "var(--font-display)" }}>
             Choose a service
           </h2>
-          <div className="grid sm:grid-cols-2 gap-4">
-            {SERVICES.map((s) => (
-              <button
-                key={s.slug}
-                onClick={() => {
-                  setService(s);
-                  setStep(2);
-                }}
-                className="flex items-center gap-4 p-3 rounded-2xl border border-border bg-white/[0.02] hover:border-gold/50 transition-colors text-left"
-              >
-                <div className="relative w-16 h-16 rounded-full overflow-hidden shrink-0">
-                  <Image src={s.image} alt={s.title} fill className="object-cover" />
-                </div>
-                <div>
-                  <p className="text-white text-sm font-semibold" style={{ fontFamily: "var(--font-playfair)" }}>
-                    {s.title}
-                  </p>
-                  <p className="text-grey text-xs">From ${(s.fromCents / 100).toFixed(0)}</p>
-                </div>
-              </button>
+          <ul className="border-t border-gold/25">
+            {services.map((s) => (
+              <li key={s.slug} className="border-b border-gold/25">
+                <button
+                  onClick={() => {
+                    setService(s);
+                    setSelectedDate(null);
+                    setStep(2);
+                  }}
+                  className="group w-full text-left py-6 flex items-baseline justify-between gap-5"
+                >
+                  <span>
+                    <span className="block text-2xl text-white group-hover:text-gold transition-colors" style={{ fontFamily: "var(--font-display)" }}>
+                      {s.title}
+                    </span>
+                    <span className="block text-white/45 text-xs mt-1 max-w-xs">{s.blurb}</span>
+                  </span>
+                  <span className="text-xs tracking-[0.1em] text-silver whitespace-nowrap text-right">
+                    {formatDuration(s.durationMinutes)}
+                    <br />
+                    <span className="text-white">from {formatPrice(s.fromCents)}</span>
+                  </span>
+                </button>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       )}
 
       {step === 2 && service && (
         <div>
-          <button onClick={() => setStep(1)} className="text-grey text-xs mb-6 hover:text-gold transition-colors">
-            ← Change service
+          <button onClick={() => setStep(1)} className="text-grey text-xs mb-6 hover:text-gold transition-colors py-2">
+            ← {service.title} · change service
           </button>
-          <p className="text-gold text-xs font-semibold tracking-widest uppercase mb-2 text-center">Step 2</p>
-          <h2 className="text-2xl md:text-3xl text-center mb-8" style={{ fontFamily: "var(--font-playfair)" }}>
+          <p className="text-gold text-[11px] font-medium tracking-[0.3em] uppercase mb-3 text-center">Step 2</p>
+          <h2 className="text-4xl text-center mb-8 font-light" style={{ fontFamily: "var(--font-display)" }}>
             Pick a date &amp; time
           </h2>
 
           <div className="flex gap-2 overflow-x-auto pb-3 mb-6 -mx-1 px-1">
             {days.map((iso) => {
-              const { weekday, day } = formatDayLabel(iso);
-              const isSunday = new Date(iso + "T00:00:00").getDay() === 0;
+              const p = dayParts(iso);
+              const off = closedWeekdays.includes(p.weekdayNum);
               return (
                 <button
                   key={iso}
-                  disabled={isSunday}
+                  disabled={off}
                   onClick={() => setSelectedDate(iso)}
-                  className={`flex flex-col items-center justify-center shrink-0 w-14 h-16 rounded-xl border text-xs transition-colors ${
+                  className={`flex flex-col items-center justify-center shrink-0 w-14 h-[68px] rounded-xl border text-xs transition-colors ${
                     selectedDate === iso
                       ? "bg-gold text-ink border-gold"
-                      : isSunday
+                      : off
                       ? "border-border text-white/20 cursor-not-allowed"
                       : "border-border text-white/70 hover:border-gold/50"
                   }`}
                 >
-                  <span className="uppercase">{weekday}</span>
-                  <span className="text-base font-semibold">{day}</span>
+                  <span className="uppercase text-[10px] tracking-wider">{p.weekday}</span>
+                  <span className="text-base font-semibold">{p.day}</span>
+                  <span className="text-[9px] uppercase opacity-60">{p.month}</span>
                 </button>
               );
             })}
           </div>
 
           {selectedDate && (
-            <div>
+            <div aria-live="polite">
+              <p className="text-white/50 text-xs text-center mb-4">{dayParts(selectedDate).long}</p>
               {loadingSlots && <p className="text-grey text-sm text-center py-6">Loading times...</p>}
-              {!loadingSlots && closed && (
-                <p className="text-grey text-sm text-center py-6">Closed this day — please pick another.</p>
-              )}
+              {!loadingSlots && closed && <p className="text-grey text-sm text-center py-6">Not available this day. Please pick another.</p>}
               {!loadingSlots && !closed && slots.length === 0 && (
-                <p className="text-grey text-sm text-center py-6">No times left this day — please pick another.</p>
+                <p className="text-grey text-sm text-center py-6">No times left this day. Please pick another.</p>
               )}
               {!loadingSlots && !closed && slots.length > 0 && (
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
@@ -190,10 +212,8 @@ export default function BookingForm() {
                     <button
                       key={t}
                       onClick={() => setSelectedTime(t)}
-                      className={`px-3 py-2.5 rounded-full text-xs border transition-colors ${
-                        selectedTime === t
-                          ? "bg-gold text-ink border-gold"
-                          : "border-border text-white/70 hover:border-gold/50"
+                      className={`px-3 py-3 rounded-full text-xs border transition-colors ${
+                        selectedTime === t ? "bg-gold text-ink border-gold" : "border-border text-white/70 hover:border-gold/50"
                       }`}
                     >
                       {t}
@@ -204,10 +224,12 @@ export default function BookingForm() {
             </div>
           )}
 
+          {error && step === 2 && <p className="text-red-400 text-xs text-center mt-4">{error}</p>}
+
           {selectedTime && (
             <button
               onClick={() => setStep(3)}
-              className="w-full mt-8 px-7 py-3.5 rounded-full bg-gold text-ink font-semibold text-sm hover:bg-gold-light transition-all"
+              className="w-full mt-8 px-7 py-4 rounded-full bg-gold text-ink text-xs font-semibold tracking-[0.22em] uppercase hover:bg-gold-light transition-colors"
             >
               Continue
             </button>
@@ -217,50 +239,22 @@ export default function BookingForm() {
 
       {step === 3 && service && selectedDate && selectedTime && (
         <form onSubmit={handleCheckout}>
-          <button
-            type="button"
-            onClick={() => setStep(2)}
-            className="text-grey text-xs mb-6 hover:text-gold transition-colors"
-          >
-            ← Change date/time
+          <button type="button" onClick={() => setStep(2)} className="text-grey text-xs mb-6 hover:text-gold transition-colors py-2">
+            ← Change date / time
           </button>
-          <p className="text-gold text-xs font-semibold tracking-widest uppercase mb-2 text-center">Step 3</p>
-          <h2 className="text-2xl md:text-3xl text-center mb-2" style={{ fontFamily: "var(--font-playfair)" }}>
+          <p className="text-gold text-[11px] font-medium tracking-[0.3em] uppercase mb-3 text-center">Step 3</p>
+          <h2 className="text-4xl text-center mb-2 font-light" style={{ fontFamily: "var(--font-display)" }}>
             Your details
           </h2>
           <p className="text-grey text-xs text-center mb-8">
-            {service.title} · {selectedDate} at {selectedTime}
+            {service.title} · {dayParts(selectedDate).long} at {selectedTime}
           </p>
 
           <div className="grid sm:grid-cols-2 gap-4 mb-4">
-            <input
-              type="text"
-              required
-              maxLength={200}
-              placeholder="Full name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className={inputClasses}
-            />
-            <input
-              type="tel"
-              required
-              maxLength={40}
-              placeholder="Phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className={inputClasses}
-            />
+            <input type="text" required maxLength={200} autoComplete="name" placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} className={inputClasses} />
+            <input type="tel" required maxLength={40} autoComplete="tel" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClasses} />
           </div>
-          <input
-            type="email"
-            required
-            maxLength={200}
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={`${inputClasses} mb-4`}
-          />
+          <input type="email" required maxLength={200} autoComplete="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className={`${inputClasses} mb-4`} />
           <textarea
             maxLength={1000}
             rows={3}
@@ -270,10 +264,14 @@ export default function BookingForm() {
             className={`${inputClasses} resize-none mb-4`}
           />
 
-          <div className="rounded-2xl border border-border bg-white/[0.02] p-4 mb-4 text-xs text-white/60">
-            A ${(DEPOSIT_CENTS / 100).toFixed(0)} non-refundable deposit reserves this slot and applies toward
-            your service total (from ${(service.fromCents / 100).toFixed(0)}). Full policies at checkout and
-            on the FAQ page.
+          <div className="rounded-2xl border border-gold/25 bg-white/[0.02] p-5 mb-4 text-xs text-white/60 leading-relaxed">
+            A {formatPrice(deposit)} non-refundable deposit holds this time and applies toward your total (from{" "}
+            {formatPrice(service.fromCents)}). Please give 24 hours&apos; notice to reschedule or cancel; late cancellations are
+            charged 50% and no-shows 100%.{" "}
+            <a href="/policies" target="_blank" rel="noopener noreferrer" className="text-gold underline underline-offset-4">
+              Full policies
+            </a>
+            .
           </div>
 
           {error && <p className="text-red-400 text-xs text-center mb-4">{error}</p>}
@@ -281,9 +279,9 @@ export default function BookingForm() {
           <button
             type="submit"
             disabled={status === "loading"}
-            className="w-full px-7 py-3.5 rounded-full bg-gold text-ink font-semibold text-sm hover:bg-gold-light transition-all disabled:opacity-60"
+            className="w-full px-7 py-4 rounded-full bg-gold text-ink text-xs font-semibold tracking-[0.22em] uppercase hover:bg-gold-light transition-colors disabled:opacity-60"
           >
-            {status === "loading" ? "Redirecting to payment..." : `Pay $${(DEPOSIT_CENTS / 100).toFixed(0)} Deposit`}
+            {status === "loading" ? "Redirecting to payment..." : `Pay ${formatPrice(deposit)} deposit`}
           </button>
         </form>
       )}

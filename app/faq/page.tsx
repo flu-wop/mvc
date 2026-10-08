@@ -18,7 +18,7 @@ export default function FAQPage() {
             forward to welcoming you to the MVC Creations experience.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="#booking" className="px-7 py-3 rounded-full bg-gold text-ink font-semibold text-sm hover:bg-gold-light transition-all">
+            <Link href="/book" className="px-7 py-3 rounded-full bg-gold text-ink font-semibold text-sm hover:bg-gold-light transition-all">
               Book Your Appointment
             </Link>
             <Link href="/contact" className="px-7 py-3 rounded-full border border-white/30 text-white font-medium text-sm hover:border-gold hover:text-gold transition-all">

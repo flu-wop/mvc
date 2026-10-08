@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Mail, Phone, Instagram } from "lucide-react";
+import { BUSINESS } from "@/lib/site";
 
 export default function ContactPage() {
   return (
@@ -14,14 +15,14 @@ export default function ContactPage() {
           out and I&apos;ll get back to you as soon as possible.
         </p>
         <div className="flex flex-col gap-4 text-white/70 text-sm">
-          <a href="tel:5043032763" className="flex items-center justify-center gap-2 hover:text-gold transition-colors">
-            <Phone className="w-4 h-4 text-gold" /> (504) 303-2763
+          <a href={BUSINESS.phoneHref} className="flex items-center justify-center gap-2 hover:text-gold transition-colors">
+            <Phone className="w-4 h-4 text-gold" /> {BUSINESS.phone}
           </a>
-          <a href="mailto:mvcxreations@gmail.com" className="flex items-center justify-center gap-2 hover:text-gold transition-colors">
-            <Mail className="w-4 h-4 text-gold" /> mvcxreations@gmail.com
+          <a href={`mailto:${BUSINESS.email}`} className="flex items-center justify-center gap-2 hover:text-gold transition-colors">
+            <Mail className="w-4 h-4 text-gold" /> {BUSINESS.email}
           </a>
-          <a href="https://www.instagram.com/mvcxcreations" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 hover:text-gold transition-colors">
-            <Instagram className="w-4 h-4 text-gold" /> @mvcxcreations
+          <a href={BUSINESS.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 hover:text-gold transition-colors">
+            <Instagram className="w-4 h-4 text-gold" /> {BUSINESS.instagramHandle}
           </a>
         </div>
       </main>

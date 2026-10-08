@@ -1,25 +1,12 @@
 import type { MetadataRoute } from "next";
-
-const BASE_URL = "https://mvc-creations.vercel.app";
+import { SHOP_ENABLED } from "@/lib/features";
+import { SITE_URL } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticRoutes = [
-    "",
-    "/about",
-    "/book",
-    "/contact",
-    "/content-creation",
-    "/faq",
-    "/gallery",
-    "/portfolio",
-    "/press-ons",
-    "/privacy",
-    "/services",
-    "/shop",
-  ];
+  const staticRoutes = ["", "/book", "/portfolio", "/about", "/faq", "/policies", "/contact", "/privacy", ...(SHOP_ENABLED ? ["/shop"] : [])];
 
   return staticRoutes.map((route) => ({
-    url: `${BASE_URL}${route}`,
+    url: `${SITE_URL}${route}`,
     lastModified: new Date(),
   }));
 }

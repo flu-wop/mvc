@@ -3,8 +3,9 @@
 import { useRef, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
+import { SHOP_ENABLED } from "@/lib/features";
 
-const groups: { title: string; items: { q: string; a: string }[] }[] = [
+const allGroups: { title: string; shopOnly?: boolean; items: { q: string; a: string }[] }[] = [
   {
     title: "Luxury Nail Services",
     items: [
@@ -28,6 +29,7 @@ const groups: { title: string; items: { q: string; a: string }[] }[] = [
   },
   {
     title: "Press-On Nails",
+    shopOnly: true,
     items: [
       {
         q: "Do you offer custom press-on nails?",
@@ -66,6 +68,7 @@ const groups: { title: string; items: { q: string; a: string }[] }[] = [
   },
   {
     title: "Shipping",
+    shopOnly: true,
     items: [
       {
         q: "How long does shipping take?",
@@ -83,6 +86,7 @@ const groups: { title: string; items: { q: string; a: string }[] }[] = [
   },
   {
     title: "Returns & Exchanges",
+    shopOnly: true,
     items: [
       {
         q: "Do you accept returns?",
@@ -154,6 +158,9 @@ const groups: { title: string; items: { q: string; a: string }[] }[] = [
     ],
   },
 ];
+
+// Press-on ordering, shipping and returns only apply once the shop is live.
+const groups = allGroups.filter((g) => SHOP_ENABLED || !g.shopOnly);
 
 function FAQGroup({ title, items }: { title: string; items: { q: string; a: string }[] }) {
   const [open, setOpen] = useState<number | null>(null);
