@@ -13,7 +13,7 @@ export function HoursApp() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [blocked, setBlocked] = useState<Blocked[]>([]);
   const [msg, setMsg] = useState<{ kind: "ok" | "error" | "warn"; text: string } | null>(null);
-  const [bf, setBf] = useState({ startDate: "", endDate: "", allDay: true, start: "10:00", end: "18:00", reason: "" });
+  const [bf, setBf] = useState({ startDate: "", endDate: "", allDay: true, start: "09:00", end: "18:00", reason: "" });
 
   const loadBlocked = async () => {
     const r = await api<{ blocked: Blocked[] }>("/api/admin/blocked");

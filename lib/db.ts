@@ -140,7 +140,7 @@ async function runInit() {
     CREATE TABLE IF NOT EXISTS business_hours (
       weekday INTEGER PRIMARY KEY,         -- 0 = Sunday
       closed INTEGER NOT NULL DEFAULT 0,
-      open_min INTEGER NOT NULL DEFAULT 600,
+      open_min INTEGER NOT NULL DEFAULT 540,
       close_min INTEGER NOT NULL DEFAULT 1080
     )
   `);
@@ -185,9 +185,9 @@ async function runInit() {
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`,
         args: [s.slug, s.title, s.blurb, s.image, s.fromCents, s.durationMinutes, s.depositCents, s.color, s.sort],
       })),
-      // Mon–Sat 10:00–6:00, Sunday closed: exactly what online booking did before.
+      // Mon–Sat 9:00–6:00, Sunday closed: the hours on Margie's own booking page.
       ...[0, 1, 2, 3, 4, 5, 6].map((d) => ({
-        sql: `INSERT OR IGNORE INTO business_hours (weekday, closed, open_min, close_min) VALUES (?, ?, 600, 1080)`,
+        sql: `INSERT OR IGNORE INTO business_hours (weekday, closed, open_min, close_min) VALUES (?, ?, 540, 1080)`,
         args: [d, d === 0 ? 1 : 0],
       })),
       ...(

@@ -32,7 +32,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_clients_email ON clients(email_lc);
 CREATE TABLE IF NOT EXISTS business_hours (
   weekday INTEGER PRIMARY KEY,            -- 0 = Sunday
   closed INTEGER NOT NULL DEFAULT 0,
-  open_min INTEGER NOT NULL DEFAULT 600,  -- minutes after midnight, shop-local
+  open_min INTEGER NOT NULL DEFAULT 540,  -- minutes after midnight, shop-local
   close_min INTEGER NOT NULL DEFAULT 1080
 );
 
@@ -75,9 +75,9 @@ INSERT OR IGNORE INTO services (slug,title,blurb,image,price_cents,duration_minu
  ('nail-art','Nail Art','Full creative expression: hand-painted detail, chrome, 3D elements, encapsulated designs.','/images/service-nail-art.jpg',11000,120,2500,'#8E3B4C',1,4),
  ('press-ons','Custom Press-Ons','Salon-quality custom press-ons made to fit your exact nail beds.','/images/service-press-ons.jpg',5000,45,2500,'#F2EDE4',1,5);
 
--- Mon-Sat 10:00-6:00, Sunday closed (what online booking enforced before).
+-- Mon-Sat 9:00-6:00, Sunday closed (hours from Margie's booking page).
 INSERT OR IGNORE INTO business_hours (weekday,closed,open_min,close_min) VALUES
- (0,1,600,1080),(1,0,600,1080),(2,0,600,1080),(3,0,600,1080),(4,0,600,1080),(5,0,600,1080),(6,0,600,1080);
+ (0,1,540,1080),(1,0,540,1080),(2,0,540,1080),(3,0,540,1080),(4,0,540,1080),(5,0,540,1080),(6,0,540,1080);
 INSERT OR IGNORE INTO settings (key,value) VALUES
  ('slot_minutes','30'),('buffer_minutes','0'),('min_notice_hours','2'),('reminders_enabled','1');
 

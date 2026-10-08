@@ -54,7 +54,7 @@ Instagram bio link: the domain (or `mvc-creations.vercel.app` until then). Sugge
 
 ## 4. Needed from Margie
 - 8 to 12 real photos of finished sets (good light, hands only, clean background) and which service each is. Drop them in `public/portfolio` and add to `lib/portfolio.ts`. Only 4 exist now.
-- Confirm prices and durations (Admin, Services) and hours (Admin, Hours). Defaults: Mon to Sat, 10am to 6pm.
+- Confirm prices and durations (Admin, Services) and hours (Admin, Hours). Defaults follow her booking page: Mon to Sat, 9am to 6pm, Sunday closed.
 - Confirm policy wording: $25 deposit, 24 hours' notice, 50% late cancel, 100% no-show, 10-minute grace. The old FAQ said 15 minutes late.
 - Which email is the real inbox: the site uses mvcxcreations@gmail.com; the FAQ used to list a different address.
 - A replacement press-ons photo (current one has a Gemini watermark).

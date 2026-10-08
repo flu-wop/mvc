@@ -1,29 +1,13 @@
 import { ImageResponse } from "next/og";
 import { NextRequest } from "next/server";
 import { qrDataUri } from "@/lib/qr";
+import { displayFont } from "@/lib/og-font";
 import { BUSINESS, SITE_URL } from "@/lib/site";
 
 export const runtime = "nodejs";
 
 // The picture on the card. Swap this one file path to change it everywhere.
 const CARD_IMAGE = "/images/service-gel-x.jpg";
-
-let fontCache: ArrayBuffer | null | undefined;
-async function displayFont(): Promise<ArrayBuffer | null> {
-  if (fontCache !== undefined) return fontCache;
-  try {
-    const css = await (
-      await fetch("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400", {
-        headers: { "User-Agent": "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; de-at) AppleWebKit/533.21.1" },
-      })
-    ).text();
-    const url = css.match(/src: url\((.+?)\) format\('(?:truetype|opentype)'\)/)?.[1];
-    fontCache = url ? await (await fetch(url)).arrayBuffer() : null;
-  } catch {
-    fontCache = null;
-  }
-  return fontCache;
-}
 
 export async function GET(req: NextRequest) {
   const origin = req.nextUrl.origin;
