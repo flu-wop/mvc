@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { getDb, initDb } from "@/lib/db";
-import { sendBookingEmails, sendDoubleBookingAlert, sendWebhookFailureAlert } from "@/lib/email";
+import { sendBookingEmails, sendDoubleBookingAlert, sendEmailFailureAlert, sendWebhookFailureAlert } from "@/lib/email";
 import { findConflicts } from "@/lib/availability";
 import { upsertClient } from "@/lib/clients";
 import { getService, getServiceByTitle, FALLBACK_DURATION_MINUTES } from "@/lib/services";
@@ -108,6 +108,7 @@ export async function POST(req: Request) {
         }
       } catch (e) {
         console.error("booking email failed", e); // never fail the webhook on email error
+        if (status !== "needs_review") await sendEmailFailureAlert(meta, (e as Error)?.message || String(e));
       }
       return NextResponse.json({ received: true, status });
     }

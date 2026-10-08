@@ -110,6 +110,31 @@ export async function sendDoubleBookingAlert(m: BookingMeta, sessionId: string) 
   }
 }
 
+// The client paid but their confirmation email didn't go out. Margie needs to
+// know so she can text them; logging alone would leave it unnoticed.
+export async function sendEmailFailureAlert(m: BookingMeta, error: string) {
+  try {
+    const resend = await getResend();
+    const ownerTo = process.env.RESEND_TO_EMAIL;
+    if (!resend || !ownerTo) {
+      console.error("[email-failure-alert] email not configured:", m.email, error);
+      return;
+    }
+    await resend.emails.send({
+      from: from(),
+      to: ownerTo,
+      subject: `Confirmation email failed — ${m.name}, ${m.event_date} ${m.event_time}`,
+      html: shell(`
+        <p style="font-size:16px;margin:0 0 12px"><strong>${esc(m.name)}</strong> is booked and paid, but their confirmation email did not send.</p>
+        <p style="margin:0 0 12px">${esc(m.service)} · ${when(m.event_date, m.event_time)}</p>
+        <p style="margin:0 0 12px">${esc(m.email)} · ${esc(m.phone)}</p>
+        <p style="margin:0;color:#B8BBC0;font-size:14px">The appointment is on your calendar. Please text them the details. Error: ${esc(error)}</p>`),
+    });
+  } catch (err) {
+    console.error("[email-failure-alert] failed:", err);
+  }
+}
+
 export async function sendBookingEmails(m: BookingMeta, opts: { notifyOwner?: boolean } = {}) {
   const resend = await getResend();
   if (!resend) {
