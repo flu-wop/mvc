@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    // The admin lives at /admin; /admin-dashboard is the bookmark-friendly alias.
+    return [{ source: "/admin-dashboard", destination: "/admin", permanent: false }];
+  },
   async headers() {
     return [
       {

@@ -25,7 +25,7 @@ export default function AdminLogin() {
         setLoading(false);
         return;
       }
-      router.push("/admin/orders");
+      router.push("/admin");
       router.refresh();
     } catch {
       setError("Something went wrong");

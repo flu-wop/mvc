@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
-import { safeEq, ADMIN_COOKIE } from "@/lib/admin-auth";
+import { safeEq, ADMIN_COOKIE, sessionToken } from "@/lib/admin-auth";
 
 export const runtime = "nodejs";
 
@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   const ok = await rateLimit(`admin-login:${clientIp(req)}`, 5, 900); // 5 per 15 min
   if (!ok) return new NextResponse("Too many attempts", { status: 429 });
 
-  const { password } = await req.json();
+  const { password } = await req.json().catch(() => ({ password: undefined }));
   if (
     !password ||
     typeof password !== "string" ||
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
   }
 
   const store = await cookies();
-  store.set(ADMIN_COOKIE, process.env.ADMIN_PASSWORD, {
+  store.set(ADMIN_COOKIE, sessionToken()!, {
     httpOnly: true,
     secure: true,
     sameSite: "strict",
