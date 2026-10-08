@@ -1,13 +1,15 @@
-// Client-safe service types and the seed catalog. The live catalog is the
-// `services` table (edited by Margie in /admin/services); these defaults only
-// seed an empty table and act as a fallback if the database is unreachable.
+// Client-safe service types and helpers. The live catalog is the `services` and
+// `addons` tables (edited by Margie in /admin/services); the seed data lives in
+// lib/catalog-seed.ts and is server-only.
 
 export type Service = {
   slug: string;
   title: string;
+  category: string;
   image: string;
   fromCents: number;
   durationMinutes: number;
+  paddingMinutes: number; // cleanup time held after the appointment
   depositCents: number;
   color: string; // hex, used for calendar blocks and the legend
   blurb: string;
@@ -15,74 +17,33 @@ export type Service = {
   sort: number;
 };
 
-// Flat deposit that applies toward the service total (matches the Deposits
-// policy). Per-service deposits are editable in admin; this is the default.
+export type Addon = {
+  id: number;
+  name: string;
+  priceCents: number;
+  durationMinutes: number;
+  active: boolean;
+  sort: number;
+};
+
+// Flat deposit. Per-service deposits are editable in admin; this is the default.
 export const DEPOSIT_CENTS = 2500;
 
-export const DEFAULT_SERVICES: Service[] = [
-  {
-    slug: "acrylic",
-    title: "Acrylic",
-    image: "/images/service-acrylic.jpg",
-    fromCents: 6500,
-    durationMinutes: 90,
-    depositCents: DEPOSIT_CENTS,
-    color: "#C9A96E",
-    blurb: "Sculpted strength and lasting beauty, custom-built to your preferred length and shape.",
-    active: true,
-    sort: 1,
-  },
-  {
-    slug: "gel-x",
-    title: "Gel-X",
-    image: "/images/service-gel-x.jpg",
-    fromCents: 7000,
-    durationMinutes: 90,
-    depositCents: DEPOSIT_CENTS,
-    color: "#B8BBC0",
-    blurb: "Lightweight, flexible soft gel extensions with a natural, salon-fresh finish.",
-    active: true,
-    sort: 2,
-  },
-  {
-    slug: "natural-nails",
-    title: "Natural Nails",
-    image: "/images/service-natural-nails.jpg",
-    fromCents: 4500,
-    durationMinutes: 60,
-    depositCents: DEPOSIT_CENTS,
-    color: "#A9794A",
-    blurb: "A meticulous manicure: cuticle care, shaping, and a flawless polish finish.",
-    active: true,
-    sort: 3,
-  },
-  {
-    slug: "nail-art",
-    title: "Nail Art",
-    image: "/images/service-nail-art.jpg",
-    fromCents: 11000,
-    durationMinutes: 120,
-    depositCents: DEPOSIT_CENTS,
-    color: "#8E3B4C",
-    blurb: "Full creative expression: hand-painted detail, chrome, 3D elements, encapsulated designs.",
-    active: true,
-    sort: 4,
-  },
-  {
-    slug: "press-ons",
-    title: "Custom Press-Ons",
-    image: "/images/service-press-ons.jpg",
-    fromCents: 5000,
-    durationMinutes: 45,
-    depositCents: DEPOSIT_CENTS,
-    color: "#F2EDE4",
-    blurb: "Salon-quality custom press-ons made to fit your exact nail beds.",
-    active: true,
-    sort: 5,
-  },
-];
-
 export const FALLBACK_DURATION_MINUTES = 90;
+
+// Mobile appointments (Margie travels to the client). From her booking page:
+// within 15 miles $75, 16-20 miles $100, beyond that $100 plus $2 per mile past 20,
+// which is confirmed with the client rather than charged online.
+export const TRAVEL_TIERS = [
+  { key: "within15", label: "Within 15 miles", feeCents: 7500, note: "" },
+  { key: "16to20", label: "16 to 20 miles", feeCents: 10000, note: "" },
+  { key: "21plus", label: "21+ miles", feeCents: 10000, note: "Plus $2 per mile beyond 20, confirmed before your appointment." },
+] as const;
+export type TravelTierKey = (typeof TRAVEL_TIERS)[number]["key"];
+
+// The five simplified services from the first build. Hidden once the real
+// catalog is seeded; kept in the table so old bookings still resolve.
+export const LEGACY_SLUGS = ["acrylic", "gel-x", "natural-nails", "nail-art", "press-ons"];
 
 export function formatPrice(cents: number): string {
   return `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}`;
@@ -94,4 +55,15 @@ export function formatDuration(minutes: number): string {
   if (h && m) return `${h} hr ${m} min`;
   if (h) return `${h} hr`;
   return `${m} min`;
+}
+
+export function groupByCategory(services: Service[]): { category: string; items: Service[] }[] {
+  const out: { category: string; items: Service[] }[] = [];
+  for (const s of [...services].sort((a, b) => a.sort - b.sort)) {
+    const cat = s.category || "Services";
+    let g = out.find((x) => x.category === cat);
+    if (!g) out.push((g = { category: cat, items: [] }));
+    g.items.push(s);
+  }
+  return out;
 }

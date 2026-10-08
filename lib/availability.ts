@@ -25,7 +25,10 @@ export type Blocked = {
   reason: string | null;
 };
 
-export type Interval = { id: number; startMin: number; endMin: number; name: string; service: string; status: string };
+export type Interval = { id: number; startMin: number; endMin: number; padMin: number; name: string; service: string; status: string };
+
+// What a booking needs from the calendar: its own length plus cleanup time after.
+export type Timing = { duration: number; padding: number };
 
 export type Conflict = {
   kind: "closed" | "outside_hours" | "blocked" | "booking" | "past";
@@ -88,7 +91,7 @@ export async function bookedOnDate(isoDate: string, excludeId?: number): Promise
   const placeholders = OCCUPYING_STATUSES.map(() => "?").join(",");
   const rows = (
     await getDb().execute({
-      sql: `SELECT id, name, service, status, event_time, duration_minutes
+      sql: `SELECT id, name, service, status, event_time, duration_minutes, padding_minutes
             FROM bookings
             WHERE event_date = ? AND status IN (${placeholders}) ${excludeId ? "AND id != ?" : ""}`,
       args: excludeId ? [isoDate, ...OCCUPYING_STATUSES, excludeId] : [isoDate, ...OCCUPYING_STATUSES],
@@ -103,6 +106,7 @@ export async function bookedOnDate(isoDate: string, excludeId?: number): Promise
       id: Number(r.id),
       startMin: start,
       endMin: start + dur,
+      padMin: Number(r.padding_minutes) || 0,
       name: String(r.name),
       service: String(r.service),
       status: String(r.status),
@@ -129,7 +133,7 @@ export async function findConflicts(
   isoDate: string,
   startMin: number,
   durationMin: number,
-  opts: { excludeBookingId?: number } = {}
+  opts: { excludeBookingId?: number; paddingMin?: number } = {}
 ): Promise<Conflict[]> {
   const conflicts: Conflict[] = [];
   const settings = await getSettings();
@@ -159,8 +163,9 @@ export async function findConflicts(
   }
 
   const pad = settings.bufferMinutes;
+  const myPad = opts.paddingMin ?? 0;
   for (const x of booked) {
-    if (startMin < x.endMin + pad && x.startMin < endMin + pad) {
+    if (startMin < x.endMin + x.padMin + pad && x.startMin < endMin + myPad + pad) {
       conflicts.push({
         kind: "booking",
         message: `Overlaps ${x.name} (${x.service}) at ${formatTime(x.startMin)}.`,
@@ -179,7 +184,7 @@ type DayInputs = { hours: DayHours[]; settings: Settings; blocked: Blocked[]; bo
 // the month calendar and checkout can never disagree.
 function computeSlots(
   iso: string,
-  duration: number,
+  timing: Timing,
   d: DayInputs
 ): { slots: string[]; closed: boolean; reason?: "hours" | "blocked" } {
   const h = d.hours.find((x) => x.weekday === weekdayOf(iso));
@@ -188,6 +193,7 @@ function computeSlots(
   if (dayBlocked.some((b) => b.startMin == null)) return { slots: [], closed: true, reason: "blocked" };
   if (iso < d.now.date || daysBetween(d.now.date, iso) > MAX_ADVANCE_DAYS) return { slots: [], closed: false };
 
+  const { duration, padding } = timing;
   const pad = d.settings.bufferMinutes;
   const earliest = iso === d.now.date ? d.now.minutes + d.settings.minNoticeHours * 60 : 0;
   const dayBooked = d.booked;
@@ -196,31 +202,34 @@ function computeSlots(
     if (start < earliest) continue;
     const end = start + duration;
     if (dayBlocked.some((b) => start < (b.endMin ?? 24 * 60) && (b.startMin ?? 0) < end)) continue;
-    if (dayBooked.some((x) => start < x.endMin + pad && x.startMin < end + pad)) continue;
+    if (dayBooked.some((x) => start < x.endMin + x.padMin + pad && x.startMin < end + padding + pad)) continue;
     slots.push(formatTime(start));
   }
   return { slots, closed: false };
 }
 
-async function durationFor(service: string | number): Promise<number> {
-  if (typeof service === "number") return service;
+export type ServiceRef = string | number | Timing;
+
+async function timingFor(service: ServiceRef): Promise<Timing> {
+  if (typeof service === "number") return { duration: service, padding: 0 };
+  if (typeof service === "object") return service;
   const svc = await getService(service);
-  return svc?.durationMinutes ?? FALLBACK_DURATION_MINUTES;
+  return { duration: svc?.durationMinutes ?? FALLBACK_DURATION_MINUTES, padding: svc?.paddingMinutes ?? 0 };
 }
 
 // Start times a client can pick for a given service on a given date.
 export async function availableSlots(
   isoDate: string,
-  service: string | number
+  service: ServiceRef
 ): Promise<{ slots: string[]; closed: boolean; reason?: "hours" | "blocked" }> {
-  const duration = await durationFor(service);
+  const timing = await timingFor(service);
   const [hours, settings, blocked, booked] = await Promise.all([
     getHours(),
     getSettings(),
     getBlockedBetween(isoDate, isoDate),
     bookedOnDate(isoDate),
   ]);
-  return computeSlots(isoDate, duration, { hours, settings, blocked, booked, now: nowInShop() });
+  return computeSlots(isoDate, timing, { hours, settings, blocked, booked, now: nowInShop() });
 }
 
 async function bookedBetween(from: string, to: string): Promise<Map<string, Interval[]>> {
@@ -228,7 +237,7 @@ async function bookedBetween(from: string, to: string): Promise<Map<string, Inte
   const ph = OCCUPYING_STATUSES.map(() => "?").join(",");
   const rows = (
     await getDb().execute({
-      sql: `SELECT id, name, service, status, event_date, event_time, duration_minutes
+      sql: `SELECT id, name, service, status, event_date, event_time, duration_minutes, padding_minutes
             FROM bookings WHERE event_date BETWEEN ? AND ? AND status IN (${ph})`,
       args: [from, to, ...OCCUPYING_STATUSES],
     })
@@ -242,6 +251,7 @@ async function bookedBetween(from: string, to: string): Promise<Map<string, Inte
       id: Number(r.id),
       startMin: start,
       endMin: start + (Number(r.duration_minutes) || FALLBACK_DURATION_MINUTES),
+      padMin: Number(r.padding_minutes) || 0,
       name: String(r.name),
       service: String(r.service),
       status: String(r.status),
@@ -253,11 +263,11 @@ async function bookedBetween(from: string, to: string): Promise<Map<string, Inte
 
 // Number of open start times per day for a whole month ("2026-10"), in four
 // queries total. 0 means closed, blocked, past or fully booked.
-export async function monthAvailability(month: string, service: string | number): Promise<Record<string, number>> {
+export async function monthAvailability(month: string, service: ServiceRef): Promise<Record<string, number>> {
   const [y, m] = month.split("-").map(Number);
   const first = `${month}-01`;
   const last = addDays(first, new Date(Date.UTC(y, m, 0)).getUTCDate() - 1);
-  const duration = await durationFor(service);
+  const timing = await timingFor(service);
   const [hours, settings, blocked, booked] = await Promise.all([
     getHours(),
     getSettings(),
@@ -267,7 +277,7 @@ export async function monthAvailability(month: string, service: string | number)
   const now = nowInShop();
   const out: Record<string, number> = {};
   for (let iso = first; iso <= last; iso = addDays(iso, 1)) {
-    out[iso] = computeSlots(iso, duration, { hours, settings, blocked, booked: booked.get(iso) ?? [], now }).slots.length;
+    out[iso] = computeSlots(iso, timing, { hours, settings, blocked, booked: booked.get(iso) ?? [], now }).slots.length;
   }
   return out;
 }

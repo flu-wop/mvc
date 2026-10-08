@@ -4,7 +4,7 @@ import { getDb, initDb } from "@/lib/db";
 import { sendBookingEmails, sendDoubleBookingAlert, sendEmailFailureAlert, sendWebhookFailureAlert } from "@/lib/email";
 import { findConflicts } from "@/lib/availability";
 import { upsertClient } from "@/lib/clients";
-import { getService, getServiceByTitle, FALLBACK_DURATION_MINUTES } from "@/lib/services";
+import { getService, getServiceByTitle, getAddons, FALLBACK_DURATION_MINUTES } from "@/lib/services";
 import { parseTime } from "@/lib/time";
 
 export const runtime = "nodejs";
@@ -30,6 +30,24 @@ export async function POST(req: Request) {
     if (m.type === "booking") {
       const svc = (await getService(m.service_slug, { includeInactive: true })) ?? (await getServiceByTitle(m.service || ""));
       const duration = Number(m.duration_minutes) || svc?.durationMinutes || FALLBACK_DURATION_MINUTES;
+      const padding = m.padding_minutes != null && m.padding_minutes !== "" ? Number(m.padding_minutes) || 0 : svc?.paddingMinutes ?? 0;
+
+      // Snapshot add-ons (name/price/minutes) so later catalog edits don't rewrite history.
+      let addonsJson: string | null = null;
+      let addonsSummary = "";
+      const addonIds = String(m.addon_ids || "").split(",").map(Number).filter((n) => Number.isInteger(n) && n > 0);
+      if (addonIds.length) {
+        const all = await getAddons({ includeInactive: true });
+        const picked = addonIds
+          .map((id) => all.find((a) => a.id === id))
+          .filter((a): a is NonNullable<typeof a> => !!a)
+          .map((a) => ({ id: a.id, name: a.name, priceCents: a.priceCents, durationMinutes: a.durationMinutes }));
+        if (picked.length) {
+          addonsJson = JSON.stringify(picked);
+          addonsSummary = picked.map((a) => a.name).join(", ");
+        }
+      }
+      const travelFee = Number(m.travel_fee_cents) || 0;
 
       // The slot was open when checkout started, but the client may have paid
       // after someone else took it (or after Margie blocked it). We still hold
@@ -38,7 +56,7 @@ export async function POST(req: Request) {
       try {
         const startMin = parseTime(m.event_time);
         if (startMin != null) {
-          const conflicts = await findConflicts(m.event_date, startMin, duration);
+          const conflicts = await findConflicts(m.event_date, startMin, duration, { paddingMin: padding });
           if (conflicts.length > 0) status = "needs_review";
         }
       } catch (err) {
@@ -56,8 +74,9 @@ export async function POST(req: Request) {
         db.execute({
           sql: `INSERT OR IGNORE INTO bookings
                 (name, email, phone, service, service_slug, service_from_cents, event_date, event_time, message,
-                 deposit_cents, duration_minutes, client_id, source, stripe_session_id, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'online', ?, ?)`,
+                 deposit_cents, duration_minutes, padding_minutes, addons_json, travel_tier, travel_fee_cents, travel_address,
+                 client_id, source, stripe_session_id, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'online', ?, ?)`,
           args: [
             m.name,
             m.email,
@@ -70,6 +89,11 @@ export async function POST(req: Request) {
             m.message || null,
             Number(m.deposit_cents),
             duration,
+            padding,
+            addonsJson,
+            m.travel_tier || null,
+            travelFee || null,
+            m.travel_address || null,
             clientId,
             s.id,
             st,
@@ -99,7 +123,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ received: true, duplicate: true });
       }
 
-      const meta = { ...m, duration_minutes: String(duration) };
+      const meta = { ...m, duration_minutes: String(duration), addons_summary: addonsSummary };
       try {
         if (status === "needs_review") {
           await sendDoubleBookingAlert(meta, s.id);

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
-import { getService } from "@/lib/services";
+import { calcBooking, isCalcError } from "@/lib/booking-calc";
 import { availableSlots } from "@/lib/availability";
 import { isIsoDate } from "@/lib/time";
 import { SITE_URL } from "@/lib/site";
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
 
-  const { name, email, phone, serviceSlug, eventDate, eventTime, message } = body;
+  const { name, email, phone, serviceSlug, eventDate, eventTime, message, addonIds, travel } = body;
 
   if (typeof name !== "string" || !name.trim() || name.length > 200) {
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -36,16 +36,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Message too long" }, { status: 400 });
   }
 
-  // Price, duration and deposit always come from the services table, never from
-  // anything the browser sent.
-  const service = await getService(serviceSlug);
-  if (!service) {
-    return NextResponse.json({ error: "Invalid service" }, { status: 400 });
+  // Price, duration, padding, add-ons and travel fee always come from the database,
+  // never from anything the browser sent.
+  const mobile = travel && typeof travel === "object" && travel.tier;
+  const calc = await calcBooking({ serviceSlug, addonIds, travelTier: mobile ? travel.tier : null });
+  if (isCalcError(calc)) return NextResponse.json({ error: calc.error }, { status: 400 });
+  const { service, addons, timing } = calc;
+
+  let travelAddress = "";
+  if (mobile) {
+    travelAddress = typeof travel.address === "string" ? travel.address.trim() : "";
+    if (travelAddress.length < 8 || travelAddress.length > 300) {
+      return NextResponse.json({ error: "Please enter the full address where Margie should travel." }, { status: 400 });
+    }
   }
 
   // Re-check server-side: the client's earlier availability fetch may be stale,
-  // and this also enforces hours, blocked time, duration and minimum notice.
-  const { slots, closed } = await availableSlots(eventDate, service.slug);
+  // and this also enforces hours, blocked time, duration, padding and minimum notice.
+  const { slots, closed } = await availableSlots(eventDate, timing);
   if (closed) {
     return NextResponse.json({ error: "We're closed that day. Please pick another date." }, { status: 409 });
   }
@@ -72,6 +80,21 @@ export async function POST(req: NextRequest) {
           },
         },
       },
+      ...(calc.travel
+        ? [
+            {
+              quantity: 1,
+              price_data: {
+                currency: "usd",
+                unit_amount: calc.travel.feeCents,
+                product_data: {
+                  name: `Mobile travel fee (${calc.travel.label})`,
+                  description: "Charged now and non-refundable. Separate from your service total.",
+                },
+              },
+            },
+          ]
+        : []),
     ],
     success_url: `${SITE_URL}/book/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${SITE_URL}/book?canceled=1`,
@@ -91,7 +114,13 @@ export async function POST(req: NextRequest) {
       service: service.title,
       service_slug: service.slug,
       service_from_cents: String(service.fromCents),
-      duration_minutes: String(service.durationMinutes),
+      duration_minutes: String(timing.duration),
+      padding_minutes: String(timing.padding),
+      addon_ids: addons.map((a) => a.id).join(","),
+      travel_tier: calc.travel?.tier ?? "",
+      travel_fee_cents: String(calc.travel?.feeCents ?? 0),
+      travel_address: travelAddress,
+      addons_from_cents: String(addons.reduce((n, a) => n + a.priceCents, 0)),
       event_date: eventDate,
       event_time: eventTime,
       message: message?.trim() || "",

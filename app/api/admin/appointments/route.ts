@@ -33,7 +33,7 @@ export async function POST(req: Request) {
   const notes = str(body.notes ?? "", 2000);
 
   if (!body.force) {
-    const conflicts = await findConflicts(body.date, startMin, duration);
+    const conflicts = await findConflicts(body.date, startMin, duration, { paddingMin: service.paddingMinutes });
     if (conflicts.length) return bad("That time has conflicts", 409, { conflicts });
   }
 
@@ -56,10 +56,10 @@ export async function POST(req: Request) {
     const r = await db.execute({
       sql: `INSERT INTO bookings
             (name, email, phone, service, service_slug, service_from_cents, event_date, event_time, message,
-             deposit_cents, duration_minutes, client_id, notes, source, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, 'manual', ?) RETURNING id`,
+             deposit_cents, duration_minutes, padding_minutes, client_id, notes, source, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, 'manual', ?) RETURNING id`,
       args: [name, email, phone, service.title, service.slug, service.fromCents, body.date, time,
-             service.depositCents, duration, clientId, notes, paid ? "paid" : "pending"],
+             service.depositCents, duration, service.paddingMinutes, clientId, notes, paid ? "paid" : "pending"],
     });
     id = Number(r.rows[0].id);
   } catch (err) {

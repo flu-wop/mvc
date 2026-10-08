@@ -31,12 +31,14 @@ type Counts = Record<string, number>;
 export default function BookingCalendar({
   todayIso,
   serviceSlug,
+  addons = [],
   selectedDate,
   onSelect,
   closedWeekdays,
 }: {
   todayIso: string;
   serviceSlug: string;
+  addons?: number[];
   selectedDate: string | null;
   onSelect: (iso: string) => void;
   closedWeekdays: number[];
@@ -46,6 +48,7 @@ export default function BookingCalendar({
   const [counts, setCounts] = useState<Counts>({});
   const [loaded, setLoaded] = useState<Record<string, boolean>>({});
   const [failed, setFailed] = useState(false);
+  const addonKey = addons.join(",");
   const lastDay = addDays(todayIso, MAX_AHEAD_DAYS);
 
   // Which months the current view needs (a week can straddle two).
@@ -61,13 +64,13 @@ export default function BookingCalendar({
   useEffect(() => {
     setCounts({});
     setLoaded({});
-  }, [serviceSlug]);
+  }, [serviceSlug, addonKey]);
 
   useEffect(() => {
     let cancelled = false;
     for (const month of needed) {
       if (loaded[month]) continue;
-      fetch(`/api/availability/month?month=${month}&service=${encodeURIComponent(serviceSlug)}`)
+      fetch(`/api/availability/month?month=${month}&service=${encodeURIComponent(serviceSlug)}${addonKey ? `&addons=${addonKey}` : ""}`)
         .then((r) => (r.ok ? r.json() : Promise.reject()))
         .then((data) => {
           if (cancelled) return;
@@ -80,7 +83,7 @@ export default function BookingCalendar({
     return () => {
       cancelled = true;
     };
-  }, [needed, serviceSlug, loaded]);
+  }, [needed, serviceSlug, addonKey, loaded]);
 
   const monthReady = needed.every((m) => loaded[m]);
 

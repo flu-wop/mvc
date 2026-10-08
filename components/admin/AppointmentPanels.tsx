@@ -73,7 +73,7 @@ export function AppointmentPanel({
 
       <div className="text-sm text-white/90 space-y-1">
         <p>{formatDateLong(a.date)}</p>
-        <p className="text-grey">{a.time} · {a.durationMinutes} min</p>
+        <p className="text-grey">{a.time} · {a.durationMinutes} min{a.paddingMinutes ? ` + ${a.paddingMinutes} cleanup` : ""}</p>
       </div>
 
       {a.status === "needs_review" && (
@@ -88,6 +88,10 @@ export function AppointmentPanel({
         <p className="text-grey">
           Deposit {money(a.depositCents)} {a.refundedAt ? "refunded" : a.depositPaid ? "received" : "not received yet"} · {a.source === "manual" ? "added by hand" : "booked online"}
         </p>
+        {a.addons.length > 0 && <p className="text-grey">Add-ons: {a.addons.map((x) => x.name).join(", ")}</p>}
+        {a.travelAddress && (
+          <p className="text-grey">Mobile: {a.travelAddress}{a.travelFeeCents ? ` (travel fee $${a.travelFeeCents / 100} paid)` : ""}</p>
+        )}
         {a.message && <p className="text-grey">Client note: {a.message}</p>}
       </div>
 

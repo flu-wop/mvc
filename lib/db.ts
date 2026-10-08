@@ -1,5 +1,7 @@
 import { createClient, type Client } from "@libsql/client";
-import { DEFAULT_SERVICES } from "./service-defaults";
+import { LEGACY_SLUGS } from "./service-defaults";
+import { SEED_ADDONS, SEED_SERVICES } from "./catalog-seed";
+import { DEPOSIT_CENTS } from "./service-defaults";
 
 let _db: Client | null = null;
 
@@ -125,6 +127,23 @@ async function runInit() {
     )
   `);
   await db.execute(`
+    CREATE TABLE IF NOT EXISTS addons (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      price_cents INTEGER NOT NULL DEFAULT 0,
+      duration_minutes INTEGER NOT NULL DEFAULT 0,
+      active INTEGER NOT NULL DEFAULT 1,
+      sort INTEGER NOT NULL DEFAULT 0
+    )
+  `);
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS service_addons (
+      service_slug TEXT NOT NULL,
+      addon_id INTEGER NOT NULL,
+      PRIMARY KEY (service_slug, addon_id)
+    )
+  `);
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS clients (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
@@ -165,6 +184,13 @@ async function runInit() {
 
   // ── New booking columns ────────────────────────────────────────────────
   await addColumn("newsletter", "interest", "TEXT");
+  await addColumn("services", "category", "TEXT NOT NULL DEFAULT ''");
+  await addColumn("services", "padding_minutes", "INTEGER NOT NULL DEFAULT 0");
+  await addColumn("bookings", "padding_minutes", "INTEGER");
+  await addColumn("bookings", "addons_json", "TEXT");
+  await addColumn("bookings", "travel_tier", "TEXT");
+  await addColumn("bookings", "travel_fee_cents", "INTEGER");
+  await addColumn("bookings", "travel_address", "TEXT");
   await addColumn("bookings", "service_slug", "TEXT");
   await addColumn("bookings", "duration_minutes", "INTEGER");
   await addColumn("bookings", "client_id", "INTEGER");
@@ -180,11 +206,21 @@ async function runInit() {
   // ── Seed defaults (never overwrites edits) ─────────────────────────────
   await db.batch(
     [
-      ...DEFAULT_SERVICES.map((s) => ({
-        sql: `INSERT OR IGNORE INTO services (slug, title, blurb, image, price_cents, duration_minutes, deposit_cents, color, active, sort)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`,
-        args: [s.slug, s.title, s.blurb, s.image, s.fromCents, s.durationMinutes, s.depositCents, s.color, s.sort],
+      ...SEED_SERVICES.map((s) => ({
+        sql: `INSERT OR IGNORE INTO services (slug, title, blurb, image, price_cents, duration_minutes, padding_minutes, deposit_cents, color, category, active, sort)
+              VALUES (?, ?, ?, '', ?, ?, ?, ?, ?, ?, 1, ?)`,
+        args: [s.slug, s.title, s.blurb, s.fromCents, s.durationMinutes, s.paddingMinutes, DEPOSIT_CENTS, s.color, s.category, s.sort],
       })),
+      ...SEED_ADDONS.map((a) => ({
+        sql: `INSERT OR IGNORE INTO addons (id, name, price_cents, duration_minutes, active, sort) VALUES (?, ?, ?, ?, 1, ?)`,
+        args: [a.id, a.name, a.priceCents, a.durationMinutes, a.sort],
+      })),
+      ...SEED_SERVICES.flatMap((s) =>
+        s.addonIds.map((id) => ({
+          sql: `INSERT OR IGNORE INTO service_addons (service_slug, addon_id) VALUES (?, ?)`,
+          args: [s.slug, id],
+        }))
+      ),
       // Mon–Sat 9:00–6:00, Sunday closed: the hours on Margie's own booking page.
       ...[0, 1, 2, 3, 4, 5, 6].map((d) => ({
         sql: `INSERT OR IGNORE INTO business_hours (weekday, closed, open_min, close_min) VALUES (?, ?, 540, 1080)`,
@@ -204,6 +240,19 @@ async function runInit() {
     ],
     "write"
   );
+
+  // One time: hide the first build's five simplified services now that the real
+  // catalog exists. They stay in the table so old bookings keep their color.
+  const marker = await db.execute(`SELECT 1 FROM settings WHERE key = 'catalog_v2'`);
+  if (!marker.rows.length) {
+    await db.batch(
+      [
+        ...LEGACY_SLUGS.map((slug) => ({ sql: `UPDATE services SET active = 0, sort = 999 WHERE slug = ?`, args: [slug] })),
+        { sql: `INSERT OR IGNORE INTO settings (key, value) VALUES ('catalog_v2', '1')`, args: [] },
+      ],
+      "write"
+    );
+  }
 
   // ── Backfill rows created before this migration ────────────────────────
   await db.execute(`

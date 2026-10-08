@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BookingForm from "@/components/BookingForm";
-import { getServices } from "@/lib/services";
+import { getServices, getAddons, getServiceAddonMap } from "@/lib/services";
 import { getHours } from "@/lib/availability";
 import { nowInShop } from "@/lib/time";
 
@@ -20,7 +20,12 @@ export default async function BookPage({
   searchParams: Promise<{ service?: string; canceled?: string }>;
 }) {
   const { service, canceled } = await searchParams;
-  const [services, hours] = await Promise.all([getServices(), getHours().catch(() => [])]);
+  const [services, addons, addonMap, hours] = await Promise.all([
+    getServices(),
+    getAddons(),
+    getServiceAddonMap(),
+    getHours().catch(() => []),
+  ]);
   const closedWeekdays = hours.filter((h) => h.closed).map((h) => h.weekday);
 
   return (
@@ -41,6 +46,8 @@ export default async function BookPage({
         </div>
         <BookingForm
           services={services}
+          addons={addons}
+          addonMap={addonMap}
           initialSlug={service}
           todayIso={nowInShop().date}
           closedWeekdays={closedWeekdays}

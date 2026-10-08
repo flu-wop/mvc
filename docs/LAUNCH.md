@@ -59,3 +59,10 @@ Instagram bio link: the domain (or `mvc-creations.vercel.app` until then). Sugge
 - Which email is the real inbox: the site uses mvcxcreations@gmail.com; the FAQ used to list a different address.
 - A replacement press-ons photo (current one has a Gemini watermark).
 - Display font: Cormorant Garamond is a stand-in until the licensed font is chosen.
+
+## Booking menu, add-ons and travel (Acuity import)
+- The catalog (46 services in 8 categories, 36 add-ons) was imported from Margie's Acuity page and seeds an empty database automatically. After that, edit everything in /admin/services (categories, cleanup minutes, add-ons). The five original simple services are hidden automatically.
+- Booking flow: service (accordion menu) -> add-ons + salon/mobile -> date/time -> details. Add-on minutes lengthen the appointment; cleanup minutes block the calendar after it.
+- Mobile travel: within 15 mi $75, 16-20 mi $100, 21+ mi $100 charged online (extra $2/mile past 20 is confirmed by hand). Charged with the deposit, non-refundable.
+- Not bookable online: out-of-state travel ($300 retainer, by request) and the $50 before/after-hours fee. Both are described on the menu.
+- Deposit amount/wording intentionally unchanged ($25, "applies toward total") until Margie decides; her page graphic says $30, not credited.

@@ -33,12 +33,45 @@ export function parseServiceFields(body: Record<string, any>, partial: boolean) 
     if (typeof body.color !== "string" || !/^#[0-9a-fA-F]{6}$/.test(body.color)) return { error: "Pick a color" };
     out.color = body.color;
   }
+  if (has("category")) {
+    const c = str(body.category ?? "", 60);
+    if (c === null) return { error: "Category is too long" };
+    out.category = c;
+  }
+  if (has("paddingMinutes")) {
+    const p = Number(body.paddingMinutes);
+    if (!Number.isInteger(p) || p < 0 || p > 240) return { error: "Cleanup time must be 0 to 240 minutes" };
+    out.padding_minutes = p;
+  }
   if (has("active")) out.active = body.active ? 1 : 0;
   if (has("sort")) {
     const s = Number(body.sort);
     if (!Number.isInteger(s)) return { error: "Bad sort" };
     out.sort = s;
   }
+  return { fields: out };
+}
+
+
+export function parseAddonFields(body: Record<string, any>, partial: boolean) {
+  const out: Record<string, any> = {};
+  const has = (k: string) => k in body;
+  if (!partial || has("name")) {
+    const n = str(body.name, 120);
+    if (!n) return { error: "Name is required" };
+    out.name = n;
+  }
+  if (!partial || has("priceCents")) {
+    const p = Number(body.priceCents);
+    if (!Number.isInteger(p) || p < 0 || p > 10_000_00) return { error: "Price looks wrong" };
+    out.price_cents = p;
+  }
+  if (!partial || has("durationMinutes")) {
+    const d = Number(body.durationMinutes);
+    if (!Number.isInteger(d) || d < 0 || d > 240) return { error: "Added time must be 0 to 240 minutes" };
+    out.duration_minutes = d;
+  }
+  if (has("active")) out.active = body.active ? 1 : 0;
   return { fields: out };
 }
 

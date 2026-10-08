@@ -22,6 +22,16 @@ export function str(v: unknown, max: number): string | null {
 
 // Rows -> Appointment, colored by service. Joins in memory against the
 // service list (a handful of rows) instead of in SQL.
+function parseAddons(raw: unknown): Appointment["addons"] {
+  if (typeof raw !== "string" || !raw) return [];
+  try {
+    const v = JSON.parse(raw);
+    return Array.isArray(v) ? v.map((a) => ({ name: String(a.name), priceCents: Number(a.priceCents) || 0, durationMinutes: Number(a.durationMinutes) || 0 })) : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function mapAppointments(rows: any[]): Promise<Appointment[]> {
   const services = await getServices({ includeInactive: true });
   const bySlug = new Map(services.map((s) => [s.slug, s]));
@@ -53,6 +63,10 @@ export async function mapAppointments(rows: any[]): Promise<Appointment[]> {
       createdAt: r.created_at == null ? null : String(r.created_at),
       stripeBacked: !!r.stripe_session_id,
       refundedAt: r.refunded_at == null ? null : String(r.refunded_at),
+      paddingMinutes: r.padding_minutes == null ? svc?.paddingMinutes ?? 0 : Number(r.padding_minutes) || 0,
+      addons: parseAddons(r.addons_json),
+      travelFeeCents: Number(r.travel_fee_cents) || 0,
+      travelAddress: r.travel_address == null ? null : String(r.travel_address),
     };
   });
 }

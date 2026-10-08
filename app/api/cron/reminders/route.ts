@@ -43,6 +43,7 @@ export async function GET(req: NextRequest) {
         event_time: String(r.event_time),
         deposit_cents: String(r.deposit_cents),
         duration_minutes: r.duration_minutes ?? undefined,
+        travel_address: r.travel_address ? String(r.travel_address) : undefined,
       });
       if (ok) {
         await db.execute({ sql: `UPDATE bookings SET reminder_sent_at = ? WHERE id = ?`, args: [new Date().toISOString(), r.id] });

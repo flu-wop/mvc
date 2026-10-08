@@ -9,6 +9,8 @@ type BookingMeta = {
   event_date: string; // yyyy-mm-dd, shop-local
   event_time: string; // "2:00 PM", shop-local
   duration_minutes?: string | number | null;
+  addons_summary?: string | null; // "Gel removal, French tips"
+  travel_address?: string | null; // set for mobile appointments
 };
 
 // Real UTC instants so the event lands at the right wall-clock time in every
@@ -33,8 +35,8 @@ export function toEvent(
     startOutputType: "utc",
     duration: { hours: Math.floor(duration / 60), minutes: duration % 60 },
     title: `MVC Creations — ${m.service}`,
-    description: `Appointment for ${m.name}`,
-    location: "MVC Creations",
+    description: [`Appointment for ${m.name}`, m.addons_summary ? `Add-ons: ${m.addons_summary}` : ""].filter(Boolean).join("\n"),
+    location: m.travel_address ? m.travel_address : "MVC Creations",
     status: "CONFIRMED",
     url: SITE_URL,
     ...extra,

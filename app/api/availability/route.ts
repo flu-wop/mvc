@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { availableSlots } from "@/lib/availability";
-import { getService } from "@/lib/services";
+import { calcBooking, isCalcError } from "@/lib/booking-calc";
 import { isIsoDate } from "@/lib/time";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 
@@ -15,11 +15,9 @@ export async function GET(req: NextRequest) {
   if (!isIsoDate(date)) {
     return NextResponse.json({ error: "Invalid or missing date" }, { status: 400 });
   }
-  const service = await getService(serviceSlug);
-  if (!service) {
-    return NextResponse.json({ error: "Invalid or missing service" }, { status: 400 });
-  }
+  const calc = await calcBooking({ serviceSlug, addonIds: req.nextUrl.searchParams.get("addons") });
+  if (isCalcError(calc)) return NextResponse.json({ error: calc.error }, { status: 400 });
 
-  const { slots, closed, reason } = await availableSlots(date, service.slug);
-  return NextResponse.json({ slots, closed, reason: reason ?? null, durationMinutes: service.durationMinutes });
+  const { slots, closed, reason } = await availableSlots(date, calc.timing);
+  return NextResponse.json({ slots, closed, reason: reason ?? null, durationMinutes: calc.timing.duration });
 }

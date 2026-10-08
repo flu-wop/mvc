@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS services (
   image TEXT NOT NULL DEFAULT '',
   price_cents INTEGER NOT NULL,
   duration_minutes INTEGER NOT NULL,
+  padding_minutes INTEGER NOT NULL DEFAULT 0,   -- cleanup held after the appointment
+  category TEXT NOT NULL DEFAULT '',
   deposit_cents INTEGER NOT NULL DEFAULT 2500,
   color TEXT NOT NULL DEFAULT '#C9A96E',
   active INTEGER NOT NULL DEFAULT 1,
@@ -90,3 +92,26 @@ INSERT OR IGNORE INTO clients (name, email, email_lc, phone)
   SELECT name, email, lower(trim(email)), phone FROM bookings WHERE trim(email) != '' GROUP BY lower(trim(email));
 UPDATE bookings SET client_id = (SELECT id FROM clients c WHERE c.email_lc = lower(trim(bookings.email)))
   WHERE client_id IS NULL AND trim(email) != '';
+
+-- Booking menu (added with the Acuity catalog import). The app seeds the 46 services,
+-- 36 add-ons and their pairings itself on first request (lib/catalog-seed.ts), so there
+-- is nothing to insert by hand.
+CREATE TABLE IF NOT EXISTS addons (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  price_cents INTEGER NOT NULL DEFAULT 0,
+  duration_minutes INTEGER NOT NULL DEFAULT 0,
+  active INTEGER NOT NULL DEFAULT 1,
+  sort INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS service_addons (
+  service_slug TEXT NOT NULL,
+  addon_id INTEGER NOT NULL,
+  PRIMARY KEY (service_slug, addon_id)
+);
+-- Per-booking snapshots (skip a line if it errors with "duplicate column name").
+ALTER TABLE bookings ADD COLUMN padding_minutes INTEGER;
+ALTER TABLE bookings ADD COLUMN addons_json TEXT;
+ALTER TABLE bookings ADD COLUMN travel_tier TEXT;
+ALTER TABLE bookings ADD COLUMN travel_fee_cents INTEGER;
+ALTER TABLE bookings ADD COLUMN travel_address TEXT;

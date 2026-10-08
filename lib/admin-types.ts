@@ -25,6 +25,10 @@ export type Appointment = {
   /** Paid online through Stripe, so the deposit can be refunded from admin. */
   stripeBacked: boolean;
   refundedAt: string | null;
+  paddingMinutes: number;
+  addons: { name: string; priceCents: number; durationMinutes: number }[];
+  travelFeeCents: number;
+  travelAddress: string | null;
 };
 
 export type ClientRow = {

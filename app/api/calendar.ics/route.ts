@@ -3,6 +3,15 @@ import { buildFeed, toEvent } from "@/lib/ical";
 import { safeEq } from "@/lib/admin-auth";
 import { addDays, nowInShop } from "@/lib/time";
 
+function addonLine(raw: unknown): string {
+  try {
+    const v = JSON.parse(String(raw || "[]"));
+    return Array.isArray(v) && v.length ? `\n\nAdd-ons: ${v.map((a: any) => a.name).join(", ")}` : "";
+  } catch {
+    return "";
+  }
+}
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -31,11 +40,11 @@ export async function GET(req: Request) {
   const events = rows
     .map((r) =>
       toEvent(
-        { name: r.name, service: r.service, event_date: r.event_date, event_time: r.event_time, duration_minutes: r.duration_minutes },
+        { name: r.name, service: r.service, event_date: r.event_date, event_time: r.event_time, duration_minutes: r.duration_minutes, travel_address: r.travel_address },
         {
           uid: `booking-${r.id}@mvc-creations`,
           title: `${r.status === "needs_review" ? "⚠ NEEDS REVIEW · " : ""}${r.service} — ${r.name}`,
-          description: `${r.phone || ""} · ${r.email || ""}${r.message ? `\n\n${r.message}` : ""}${r.notes ? `\n\nNotes: ${r.notes}` : ""}${
+          description: `${r.phone || ""} · ${r.email || ""}${addonLine(r.addons_json)}${r.message ? `\n\n${r.message}` : ""}${r.notes ? `\n\nNotes: ${r.notes}` : ""}${
             r.status === "pending" ? "\n\nDeposit not yet received." : ""
           }`,
           status: r.status === "pending" || r.status === "needs_review" ? "TENTATIVE" : "CONFIRMED",

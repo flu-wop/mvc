@@ -14,7 +14,24 @@ type BookingMeta = {
   message?: string;
   deposit_cents: string;
   duration_minutes?: string | number;
+  addons_summary?: string;
+  travel_address?: string;
+  travel_fee_cents?: string | number;
 };
+
+// Extra lines (add-ons, mobile address) shown under the service name.
+function extras(m: BookingMeta): string {
+  const fee = Number(m.travel_fee_cents) || 0;
+  return [
+    m.addons_summary ? `Add-ons: ${esc(m.addons_summary)}` : "",
+    m.travel_address
+      ? `Mobile appointment at ${esc(m.travel_address)}${fee ? ` (travel fee $${(fee / 100).toFixed(2)} paid)` : ""}`
+      : "",
+  ]
+    .filter(Boolean)
+    .map((l) => `<br/>${l}`)
+    .join("");
+}
 
 async function getResend() {
   if (!process.env.RESEND_API_KEY) return null;
@@ -99,7 +116,7 @@ export async function sendDoubleBookingAlert(m: BookingMeta, sessionId: string) 
       subject: `⚠️ Double booking needs you — ${m.name}, ${m.event_date} ${m.event_time}`,
       html: shell(`
         <p style="font-size:16px;margin:0 0 12px"><strong>${esc(m.name)}</strong> paid a deposit for a time that was just taken.</p>
-        <p style="margin:0 0 12px">${esc(m.service)} · ${when(m.event_date, m.event_time)}</p>
+        <p style="margin:0 0 12px">${esc(m.service)} · ${when(m.event_date, m.event_time)}${extras(m)}</p>
         <p style="margin:0 0 12px">${esc(m.email)} · ${esc(m.phone)}</p>
         <p style="margin:0;color:#B8BBC0;font-size:14px;line-height:1.6">
           It is on your calendar flagged <strong>needs review</strong>. Reschedule her to an open time, or cancel and refund the deposit in Stripe (session ${esc(sessionId)}).
@@ -126,7 +143,7 @@ export async function sendEmailFailureAlert(m: BookingMeta, error: string) {
       subject: `Confirmation email failed — ${m.name}, ${m.event_date} ${m.event_time}`,
       html: shell(`
         <p style="font-size:16px;margin:0 0 12px"><strong>${esc(m.name)}</strong> is booked and paid, but their confirmation email did not send.</p>
-        <p style="margin:0 0 12px">${esc(m.service)} · ${when(m.event_date, m.event_time)}</p>
+        <p style="margin:0 0 12px">${esc(m.service)} · ${when(m.event_date, m.event_time)}${extras(m)}</p>
         <p style="margin:0 0 12px">${esc(m.email)} · ${esc(m.phone)}</p>
         <p style="margin:0;color:#B8BBC0;font-size:14px">The appointment is on your calendar. Please text them the details. Error: ${esc(error)}</p>`),
     });
@@ -153,7 +170,7 @@ export async function sendBookingEmails(m: BookingMeta, opts: { notifyOwner?: bo
     subject: `Appointment Confirmed — ${m.event_date} at ${m.event_time}`,
     html: shell(`
       <p style="font-size:18px;margin:0 0 6px">You're booked, ${esc(m.name.split(" ")[0])}.</p>
-      <p style="margin:0 0 20px;color:#B8BBC0">${esc(m.service)}<br/>${when(m.event_date, m.event_time)}</p>
+      <p style="margin:0 0 20px;color:#B8BBC0">${esc(m.service)}${extras(m)}<br/>${when(m.event_date, m.event_time)}</p>
       <p style="margin:0 0 12px;color:#B8BBC0;font-size:14px;line-height:1.6">
         Your $${esc(deposit)} deposit is paid and applies toward your service total. Please arrive 10 minutes early.
       </p>
@@ -168,7 +185,7 @@ export async function sendBookingEmails(m: BookingMeta, opts: { notifyOwner?: bo
       subject: `New Booking — ${m.name} · ${m.event_date} ${m.event_time}`,
       html: shell(`
         <p style="font-size:16px;margin:0 0 12px"><strong>New paid booking</strong></p>
-        <p style="margin:0 0 6px">${esc(m.service)} — ${when(m.event_date, m.event_time)}</p>
+        <p style="margin:0 0 6px">${esc(m.service)} — ${when(m.event_date, m.event_time)}${extras(m)}</p>
         <p style="margin:0 0 6px">${esc(m.name)} · ${esc(m.email)} · ${esc(m.phone)}</p>
         ${m.message ? `<p style="margin:0 0 6px;color:#B8BBC0">Note: ${esc(m.message)}</p>` : ""}
         <p style="margin:0;color:#B8BBC0">Deposit: $${esc(deposit)}</p>`),
@@ -204,7 +221,7 @@ export async function sendCancellationEmail(m: BookingMeta) {
     subject: `Appointment cancelled — ${m.event_date} at ${m.event_time}`,
     html: shell(`
       <p style="font-size:18px;margin:0 0 6px">Your appointment has been cancelled.</p>
-      <p style="margin:0 0 20px;color:#B8BBC0">${esc(m.service)}<br/>${when(m.event_date, m.event_time)}</p>
+      <p style="margin:0 0 20px;color:#B8BBC0">${esc(m.service)}${extras(m)}<br/>${when(m.event_date, m.event_time)}</p>
       <p style="margin:0;color:#B8BBC0;font-size:14px;line-height:1.6">
         If you'd like to rebook, you can pick a new time any time at
         <a href="${esc(SITE_URL)}/book" style="color:#C9A96E">${esc(SITE_URL.replace(/^https?:\/\//, ""))}/book</a>.
@@ -223,7 +240,7 @@ export async function sendReminderEmail(m: BookingMeta) {
     subject: `Reminder — tomorrow at ${m.event_time}`,
     html: shell(`
       <p style="font-size:18px;margin:0 0 6px">See you tomorrow, ${esc(m.name.split(" ")[0])}.</p>
-      <p style="margin:0 0 20px;color:#B8BBC0">${esc(m.service)}<br/>${when(m.event_date, m.event_time)}</p>
+      <p style="margin:0 0 20px;color:#B8BBC0">${esc(m.service)}${extras(m)}<br/>${when(m.event_date, m.event_time)}</p>
       <p style="margin:0 0 12px;color:#B8BBC0;font-size:14px;line-height:1.6">
         Please arrive 10 minutes early with clean nails. Questions or running late? Call or text ${esc(BUSINESS.phone)}.
       </p>

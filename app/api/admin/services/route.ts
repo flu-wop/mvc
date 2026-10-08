@@ -29,9 +29,9 @@ export async function POST(req: Request) {
     const slug = i === 0 ? base : `${base}-${i + 1}`;
     try {
       await db.execute({
-        sql: `INSERT INTO services (slug, title, blurb, image, price_cents, duration_minutes, deposit_cents, color, active, sort)
-              VALUES (?, ?, ?, '', ?, ?, ?, ?, ?, ?)`,
-        args: [slug, f.title, f.blurb ?? "", f.price_cents, f.duration_minutes, f.deposit_cents, f.color,
+        sql: `INSERT INTO services (slug, title, blurb, image, price_cents, duration_minutes, padding_minutes, deposit_cents, color, category, active, sort)
+              VALUES (?, ?, ?, '', ?, ?, ?, ?, ?, ?, ?, ?)`,
+        args: [slug, f.title, f.blurb ?? "", f.price_cents, f.duration_minutes, f.padding_minutes ?? 0, f.deposit_cents, f.color, f.category ?? "",
                f.active ?? 1, Number(max.m) + 1],
       });
       return NextResponse.json({ slug }, { status: 201 });

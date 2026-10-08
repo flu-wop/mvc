@@ -20,6 +20,9 @@ function meta(a: Appointment) {
     event_time: a.time,
     deposit_cents: String(a.depositCents),
     duration_minutes: a.durationMinutes,
+    addons_summary: a.addons.map((x) => x.name).join(", "),
+    travel_address: a.travelAddress ?? undefined,
+    travel_fee_cents: a.travelFeeCents,
   };
 }
 
@@ -68,7 +71,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
         const duration = Number(body.durationMinutes) || current.durationMinutes;
         if (!Number.isInteger(duration) || duration < 5 || duration > 720) return bad("Duration looks wrong");
         if (!body.force) {
-          const conflicts = await findConflicts(body.date, startMin, duration, { excludeBookingId: id });
+          const conflicts = await findConflicts(body.date, startMin, duration, { excludeBookingId: id, paddingMin: current.paddingMinutes });
           if (conflicts.length) return bad("That time has conflicts", 409, { conflicts });
         }
         const time = formatTime(startMin);
@@ -125,7 +128,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
         if (!["cancelled", "no_show", "completed"].includes(current.status)) return bad("Nothing to restore");
         if (current.status === "cancelled" && !body.force) {
           const sm = parseTime(current.time) ?? 0;
-          const conflicts = await findConflicts(current.date, sm, current.durationMinutes, { excludeBookingId: id });
+          const conflicts = await findConflicts(current.date, sm, current.durationMinutes, { excludeBookingId: id, paddingMin: current.paddingMinutes });
           if (conflicts.length) return bad("That time is no longer free", 409, { conflicts });
         }
         // A deposit that was never collected goes back to pending, not paid.
