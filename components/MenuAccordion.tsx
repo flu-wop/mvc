@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { formatDuration, formatPrice, groupByCategory, type Service } from "@/lib/service-defaults";
 
 // The full booking menu, grouped by category like the Booking Policies accordion.
@@ -75,6 +75,15 @@ export default function MenuAccordion({
           </div>
         );
       })}
+      <Link href="/card" className="w-full flex items-center justify-between gap-4 py-6 border-b border-gold/25 group">
+        <span>
+          <span className="block text-2xl md:text-3xl font-light text-white group-hover:text-gold transition-colors" style={{ fontFamily: "var(--font-display)" }}>
+            Booking Card &amp; QR
+          </span>
+          <span className="block text-white/40 text-xs mt-1">Share or download the booking page</span>
+        </span>
+        <ChevronRight className="w-5 h-5 text-gold shrink-0" />
+      </Link>
     </div>
   );
 }
