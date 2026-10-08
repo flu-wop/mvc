@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { SHOP_ENABLED } from "@/lib/features";
 
 export const runtime = "nodejs";
 
 type CartItem = { name: string; qty: number; unit_amount_cents: number };
 
 export async function POST(req: Request) {
+  // Shop is hidden; keep this endpoint closed too. NOTE: before enabling the
+  // shop, this route must validate prices server-side (it trusts client prices).
+  if (!SHOP_ENABLED) return new NextResponse("Not found", { status: 404 });
   const ok = await rateLimit(`checkout:${clientIp(req)}`, 10, 600); // 10 per 10 min
   if (!ok) return new NextResponse("Too many requests", { status: 429 });
 

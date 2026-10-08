@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb, initDb } from "@/lib/db";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { sendInquiryNotification } from "@/lib/email";
 
 export const runtime = "nodejs";
 
@@ -41,9 +42,11 @@ export async function POST(req: NextRequest) {
     details,
   } = body;
 
-  if (!isNonEmptyString(businessName, 200) || !isNonEmptyString(contactName, 200)) {
-    return NextResponse.json({ error: "Business and contact name are required" }, { status: 400 });
+  // The short footer form has no separate business field: fall back to the contact name.
+  if (!isNonEmptyString(contactName, 200)) {
+    return NextResponse.json({ error: "Your name is required" }, { status: 400 });
   }
+  const business: string = isNonEmptyString(businessName, 200) ? businessName.trim() : contactName.trim();
   if (typeof email !== "string" || email.length > 200 || !/^\S+@\S+\.\S+$/.test(email)) {
     return NextResponse.json({ error: "A valid email is required" }, { status: 400 });
   }
@@ -71,7 +74,7 @@ export async function POST(req: NextRequest) {
         (business_name, contact_name, email, phone, business_type, project_types, budget_range, timeline, instagram_or_site, details)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
-        businessName.trim(),
+        business,
         contactName.trim(),
         email.trim(),
         phone?.trim() || null,
@@ -82,6 +85,14 @@ export async function POST(req: NextRequest) {
         instagramOrSite?.trim()?.slice(0, 300) || null,
         details?.trim() || null,
       ],
+    });
+    await sendInquiryNotification({
+      contactName: contactName.trim(),
+      businessName: business,
+      email: email.trim(),
+      phone: phone?.trim() || null,
+      projectTypes,
+      details: details?.trim() || null,
     });
     return NextResponse.json({ ok: true });
   } catch (err) {

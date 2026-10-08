@@ -1,62 +1,52 @@
-export type Service = {
-  slug: string;
-  title: string;
-  image: string;
-  fromCents: number;
-  durationMinutes: number;
-  blurb: string;
-};
+import { getDb, initDb } from "./db";
+import { DEFAULT_SERVICES, DEPOSIT_CENTS, FALLBACK_DURATION_MINUTES, type Service } from "./service-defaults";
 
-// Mirrors components/Services.tsx. Keep these in sync — this is the
-// source of truth for the booking flow's price/duration.
-export const SERVICES: Service[] = [
-  {
-    slug: "acrylic",
-    title: "Acrylic",
-    image: "/images/service-acrylic.jpg",
-    fromCents: 6500,
-    durationMinutes: 90,
-    blurb: "Sculpted strength and lasting beauty, custom-built to your preferred length and shape.",
-  },
-  {
-    slug: "gel-x",
-    title: "Gel-X",
-    image: "/images/service-gel-x.jpg",
-    fromCents: 7000,
-    durationMinutes: 90,
-    blurb: "Lightweight, flexible soft gel extensions with a natural, salon-fresh finish.",
-  },
-  {
-    slug: "natural-nails",
-    title: "Natural Nails",
-    image: "/images/service-natural-nails.jpg",
-    fromCents: 4500,
-    durationMinutes: 60,
-    blurb: "A meticulous manicure — cuticle care, shaping, and a flawless polish finish.",
-  },
-  {
-    slug: "nail-art",
-    title: "Nail Art",
-    image: "/images/service-nail-art.jpg",
-    fromCents: 11000,
-    durationMinutes: 120,
-    blurb: "Full creative expression — hand-painted detail, chrome, 3D elements, encapsulated designs.",
-  },
-  {
-    slug: "press-ons",
-    title: "Press-Ons",
-    image: "/images/service-press-ons.jpg",
-    fromCents: 5000,
-    durationMinutes: 45,
-    blurb: "Salon-quality custom press-ons made to fit your exact nail beds.",
-  },
-];
+export { DEPOSIT_CENTS, FALLBACK_DURATION_MINUTES };
+export type { Service };
 
-export function getService(slug: string): Service | undefined {
-  return SERVICES.find((s) => s.slug === slug);
+function rowToService(r: any): Service {
+  return {
+    slug: String(r.slug),
+    title: String(r.title),
+    blurb: String(r.blurb ?? ""),
+    image: String(r.image ?? ""),
+    fromCents: Number(r.price_cents),
+    durationMinutes: Number(r.duration_minutes),
+    depositCents: Number(r.deposit_cents),
+    color: String(r.color || "#C9A96E"),
+    active: Number(r.active) === 1,
+    sort: Number(r.sort ?? 0),
+  };
 }
 
-// Flat deposit to reserve any appointment. Applies toward the service total
-// (matches the Deposits policy on /faq and Policies.tsx). Adjust if Margie
-// wants deposit to vary by service instead of a flat rate.
-export const DEPOSIT_CENTS = 2500;
+// Live catalog from Turso. Falls back to the seed list if the database can't
+// be reached, so the public pages never go blank.
+export async function getServices(opts: { includeInactive?: boolean } = {}): Promise<Service[]> {
+  try {
+    await initDb();
+    const db = getDb();
+    const rows = (
+      await db.execute(
+        `SELECT * FROM services ${opts.includeInactive ? "" : "WHERE active = 1"} ORDER BY sort, title`
+      )
+    ).rows;
+    return rows.map(rowToService);
+  } catch (err) {
+    console.error("[services] falling back to defaults:", err);
+    return DEFAULT_SERVICES.filter((s) => opts.includeInactive || s.active);
+  }
+}
+
+export async function getService(slug: unknown, opts: { includeInactive?: boolean } = {}): Promise<Service | undefined> {
+  if (typeof slug !== "string" || !slug) return undefined;
+  const all = await getServices({ includeInactive: true });
+  const found = all.find((s) => s.slug === slug);
+  if (!found) return undefined;
+  if (!found.active && !opts.includeInactive) return undefined;
+  return found;
+}
+
+export async function getServiceByTitle(title: string): Promise<Service | undefined> {
+  const all = await getServices({ includeInactive: true });
+  return all.find((s) => s.title.toLowerCase() === title.toLowerCase());
+}

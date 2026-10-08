@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
-import { getService, DEPOSIT_CENTS } from "@/lib/services";
-import { availableSlots, isClosedDate } from "@/lib/availability";
+import { getService } from "@/lib/services";
+import { availableSlots } from "@/lib/availability";
+import { isIsoDate } from "@/lib/time";
+import { SITE_URL } from "@/lib/site";
 
 export const runtime = "nodejs";
 
@@ -24,7 +26,7 @@ export async function POST(req: NextRequest) {
   if (typeof phone !== "string" || !phone.trim() || phone.length > 40) {
     return NextResponse.json({ error: "A valid phone number is required" }, { status: 400 });
   }
-  if (typeof eventDate !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(eventDate)) {
+  if (!isIsoDate(eventDate)) {
     return NextResponse.json({ error: "Invalid date" }, { status: 400 });
   }
   if (typeof eventTime !== "string" || !eventTime.trim()) {
@@ -34,19 +36,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Message too long" }, { status: 400 });
   }
 
-  const service = getService(serviceSlug);
+  // Price, duration and deposit always come from the services table, never from
+  // anything the browser sent.
+  const service = await getService(serviceSlug);
   if (!service) {
     return NextResponse.json({ error: "Invalid service" }, { status: 400 });
   }
 
-  if (isClosedDate(eventDate)) {
+  // Re-check server-side: the client's earlier availability fetch may be stale,
+  // and this also enforces hours, blocked time, duration and minimum notice.
+  const { slots, closed } = await availableSlots(eventDate, service.slug);
+  if (closed) {
     return NextResponse.json({ error: "We're closed that day. Please pick another date." }, { status: 409 });
   }
-
-  // Re-check the slot is still open server-side — never trust the client's
-  // earlier availability fetch, it may be stale by the time they check out.
-  const openSlots = await availableSlots(eventDate);
-  if (!openSlots.includes(eventTime)) {
+  if (!slots.includes(eventTime)) {
     return NextResponse.json(
       { error: "That time was just taken. Please choose another slot." },
       { status: 409 }
@@ -62,7 +65,7 @@ export async function POST(req: NextRequest) {
         quantity: 1,
         price_data: {
           currency: "usd",
-          unit_amount: DEPOSIT_CENTS,
+          unit_amount: service.depositCents,
           product_data: {
             name: `Deposit — ${service.title} (${eventDate} ${eventTime})`,
             description: "Non-refundable deposit, applied toward your service total.",
@@ -70,8 +73,8 @@ export async function POST(req: NextRequest) {
         },
       },
     ],
-    success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/book/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/book?canceled=1`,
+    success_url: `${SITE_URL}/book/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${SITE_URL}/book?canceled=1`,
     customer_email: email,
     metadata: {
       type: "booking",
@@ -79,11 +82,13 @@ export async function POST(req: NextRequest) {
       email: email.trim(),
       phone: phone.trim(),
       service: service.title,
+      service_slug: service.slug,
       service_from_cents: String(service.fromCents),
+      duration_minutes: String(service.durationMinutes),
       event_date: eventDate,
       event_time: eventTime,
       message: message?.trim() || "",
-      deposit_cents: String(DEPOSIT_CENTS),
+      deposit_cents: String(service.depositCents),
     },
   });
 

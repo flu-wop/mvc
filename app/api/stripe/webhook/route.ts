@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { getDb, initDb } from "@/lib/db";
-import { sendBookingEmails, sendWebhookFailureAlert } from "@/lib/email";
+import { sendBookingEmails, sendDoubleBookingAlert, sendWebhookFailureAlert } from "@/lib/email";
+import { findConflicts } from "@/lib/availability";
+import { upsertClient } from "@/lib/clients";
+import { getService, getServiceByTitle, FALLBACK_DURATION_MINUTES } from "@/lib/services";
+import { parseTime } from "@/lib/time";
 
 export const runtime = "nodejs";
 
@@ -24,25 +28,68 @@ export async function POST(req: Request) {
     const db = getDb();
 
     if (m.type === "booking") {
-      let r;
+      const svc = (await getService(m.service_slug, { includeInactive: true })) ?? (await getServiceByTitle(m.service || ""));
+      const duration = Number(m.duration_minutes) || svc?.durationMinutes || FALLBACK_DURATION_MINUTES;
+
+      // The slot was open when checkout started, but the client may have paid
+      // after someone else took it (or after Margie blocked it). We still hold
+      // their money, so record it flagged for review instead of dropping it.
+      let status = "paid";
       try {
-        r = await db.execute({
+        const startMin = parseTime(m.event_time);
+        if (startMin != null) {
+          const conflicts = await findConflicts(m.event_date, startMin, duration);
+          if (conflicts.length > 0) status = "needs_review";
+        }
+      } catch (err) {
+        console.error("[stripe-webhook] conflict check failed, recording as paid:", err);
+      }
+
+      let clientId: number | null = null;
+      try {
+        clientId = await upsertClient({ name: m.name, email: m.email, phone: m.phone });
+      } catch (err) {
+        console.error("[stripe-webhook] client upsert failed (non-fatal):", err);
+      }
+
+      const insert = (st: string) =>
+        db.execute({
           sql: `INSERT OR IGNORE INTO bookings
-                (name, email, phone, service, service_from_cents, event_date, event_time, message, deposit_cents, stripe_session_id, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'paid')`,
+                (name, email, phone, service, service_slug, service_from_cents, event_date, event_time, message,
+                 deposit_cents, duration_minutes, client_id, source, stripe_session_id, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'online', ?, ?)`,
           args: [
             m.name,
             m.email,
             m.phone,
             m.service,
+            svc?.slug ?? m.service_slug ?? null,
             Number(m.service_from_cents),
             m.event_date,
             m.event_time,
             m.message || null,
             Number(m.deposit_cents),
+            duration,
+            clientId,
             s.id,
+            st,
           ],
         });
+
+      let r;
+      try {
+        r = await insert(status);
+        if (r.rowsAffected === 0) {
+          // INSERT OR IGNORE also swallows the unique-slot index. Tell a true
+          // Stripe retry (row exists) apart from a swallowed same-minute
+          // double booking (no row): the latter must still be recorded.
+          const exists = (
+            await db.execute({ sql: `SELECT 1 FROM bookings WHERE stripe_session_id = ?`, args: [s.id] })
+          ).rows.length;
+          if (exists) return NextResponse.json({ received: true, duplicate: true });
+          status = "needs_review";
+          r = await insert(status);
+        }
       } catch (err: any) {
         console.error("[stripe-webhook] Booking DB write failed:", err);
         await sendWebhookFailureAlert({ sessionId: s.id, kind: "booking", error: err?.message || String(err) });
@@ -51,12 +98,18 @@ export async function POST(req: Request) {
       if (r.rowsAffected === 0) {
         return NextResponse.json({ received: true, duplicate: true });
       }
+
+      const meta = { ...m, duration_minutes: String(duration) };
       try {
-        await sendBookingEmails(m);
+        if (status === "needs_review") {
+          await sendDoubleBookingAlert(meta, s.id);
+        } else {
+          await sendBookingEmails(meta);
+        }
       } catch (e) {
         console.error("booking email failed", e); // never fail the webhook on email error
       }
-      return NextResponse.json({ received: true });
+      return NextResponse.json({ received: true, status });
     }
 
     // Default: shop order
