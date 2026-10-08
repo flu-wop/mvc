@@ -11,9 +11,11 @@ const REQUIRED_ENV_VARS = [
   "STRIPE_WEBHOOK_SECRET",
   "ADMIN_PASSWORD",
   "NEXT_PUBLIC_SITE_URL",
-  // RESEND_API_KEY intentionally not required yet — order confirmation emails
-  // aren't wired up (see TODO in app/api/stripe/webhook/route.ts)
 ];
+
+// Nothing breaks without these, but booking emails, reminders and the calendar
+// feed's privacy depend on them.
+const RECOMMENDED_ENV_VARS = ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "RESEND_TO_EMAIL", "CALENDAR_FEED_TOKEN", "CRON_SECRET"];
 
 export function checkEnvVars(): Record<string, CheckResult> {
   const results: Record<string, CheckResult> = {};
@@ -21,21 +23,61 @@ export function checkEnvVars(): Record<string, CheckResult> {
     const present = !!process.env[key];
     results[key] = { status: present ? "ok" : "error", detail: present ? "set" : "MISSING" };
   }
+  for (const key of RECOMMENDED_ENV_VARS) {
+    const present = !!process.env[key];
+    results[key] = { status: present ? "ok" : "warn", detail: present ? "set" : "not set" };
+  }
+  const sk = process.env.STRIPE_SECRET_KEY || "";
+  if (sk) {
+    results.STRIPE_SECRET_KEY = sk.startsWith("sk_live_")
+      ? { status: "ok", detail: "set (LIVE mode)" }
+      : sk.startsWith("sk_test_")
+      ? { status: "warn", detail: "set (TEST mode, no real money moves)" }
+      : { status: "error", detail: "set but doesn't look like a Stripe secret key" };
+  }
+  const wh = process.env.STRIPE_WEBHOOK_SECRET || "";
+  if (wh && !wh.startsWith("whsec_")) results.STRIPE_WEBHOOK_SECRET = { status: "error", detail: "should start with whsec_" };
   return results;
 }
 
 // ---- 2. Webhook Health ----
 export async function checkStripe(): Promise<CheckResult> {
+  if (!process.env.STRIPE_SECRET_KEY) return { status: "error", detail: "STRIPE_SECRET_KEY missing" };
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-    const endpoints = await stripe.webhookEndpoints.list({ limit: 10 });
-    const site = process.env.NEXT_PUBLIC_SITE_URL || "";
-    const match = endpoints.data.find((e) => e.url.includes(site.replace(/^https?:\/\//, "")));
-    if (!match) return { status: "warn", detail: "No webhook endpoint found for this site's URL" };
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    const endpoints = await stripe.webhookEndpoints.list({ limit: 20 });
+    const host = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/^https?:\/\//, "");
+    const match = host ? endpoints.data.find((e) => e.url.includes(host) && e.url.endsWith("/api/stripe/webhook")) : undefined;
+    if (!match) return { status: "warn", detail: `No endpoint for ${host || "this site"}/api/stripe/webhook in this Stripe mode` };
     if (match.status !== "enabled") return { status: "error", detail: `Endpoint status: ${match.status}` };
-    return { status: "ok", detail: `Enabled, listening for: ${match.enabled_events.slice(0, 3).join(", ")}` };
+    const events = match.enabled_events as string[];
+    if (!events.includes("*") && !events.includes("checkout.session.completed")) {
+      return { status: "error", detail: "Endpoint isn't listening for checkout.session.completed" };
+    }
+    return { status: "ok", detail: "Endpoint enabled and listening for checkout.session.completed" };
   } catch (err) {
     return { status: "error", detail: `Stripe API error: ${(err as Error).message}` };
+  }
+}
+
+export function webhookUrl(): CheckResult {
+  const site = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "");
+  return { status: site ? "ok" : "warn", detail: site ? `${site}/api/stripe/webhook` : "Set NEXT_PUBLIC_SITE_URL first" };
+}
+
+export async function checkLastBooking(): Promise<CheckResult> {
+  try {
+    const result = await getDb().execute(
+      "SELECT created_at, status FROM bookings WHERE source = 'online' ORDER BY id DESC LIMIT 1"
+    );
+    if (result.rows.length === 0) return { status: "warn", detail: "No online bookings yet" };
+    const stuck = await getDb().execute("SELECT COUNT(*) AS n FROM bookings WHERE status = 'needs_review'");
+    const n = Number(stuck.rows[0].n);
+    return n > 0
+      ? { status: "warn", detail: `${n} booking${n === 1 ? "" : "s"} need review on the calendar` }
+      : { status: "ok", detail: `Last online booking ${result.rows[0].created_at} UTC` };
+  } catch (err) {
+    return { status: "error", detail: `DB read failed: ${(err as Error).message}` };
   }
 }
 

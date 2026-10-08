@@ -16,7 +16,7 @@ export default function StickyBook() {
     window.addEventListener("scroll", on, { passive: true });
     return () => window.removeEventListener("scroll", on);
   }, [pathname]);
-  if (pathname.startsWith("/book") || pathname.startsWith("/admin")) return null;
+  if (pathname.startsWith("/book") || pathname.startsWith("/admin") || pathname.startsWith("/card")) return null;
   if (pathname === "/" && !past) return null;
   return (
     <div className="md:hidden fixed inset-x-0 bottom-0 z-40 flex justify-center pointer-events-none safe-bottom">

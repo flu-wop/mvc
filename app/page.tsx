@@ -12,6 +12,8 @@ import PolicyStrip from "@/components/home/PolicyStrip";
 import PortfolioPreview from "@/components/home/PortfolioPreview";
 import MargieIntro from "@/components/home/MargieIntro";
 import BookBand from "@/components/home/BookBand";
+import ComingSoon from "@/components/home/ComingSoon"; // PLACEHOLDER: remove before launch
+import { COMING_SOON_ENABLED } from "@/lib/features";
 import { getServices } from "@/lib/services";
 import { formatPrice } from "@/lib/service-defaults";
 import { BUSINESS, SITE_URL } from "@/lib/site";
@@ -45,6 +47,7 @@ export default async function HomePage() {
         <PolicyStrip depositLabel={deposit} />
         <PortfolioPreview limit={8} />
         <MargieIntro />
+        {COMING_SOON_ENABLED && <ComingSoon />}
         <BookBand />
       </main>
       <Footer />

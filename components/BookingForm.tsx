@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import BookingCalendar from "./BookingCalendar";
 import { DEPOSIT_CENTS, formatDuration, formatPrice, type Service } from "@/lib/service-defaults";
 
 const inputClasses =
@@ -8,12 +9,6 @@ const inputClasses =
 
 // Calendar-day math done on plain y/m/d so the browser's timezone never shifts
 // a date. `todayIso` comes from the server in the shop's timezone.
-function addDays(iso: string, n: number): string {
-  const [y, m, d] = iso.split("-").map(Number);
-  const dt = new Date(Date.UTC(y, m - 1, d + n));
-  return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, "0")}-${String(dt.getUTCDate()).padStart(2, "0")}`;
-}
-
 function dayParts(iso: string) {
   const [y, m, d] = iso.split("-").map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d));
@@ -41,7 +36,6 @@ export default function BookingForm({
   const [step, setStep] = useState<1 | 2 | 3>(preselected ? 2 : 1);
   const [service, setService] = useState<Service | null>(preselected);
 
-  const days = useMemo(() => Array.from({ length: 28 }, (_, i) => addDays(todayIso, i)), [todayIso]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [slots, setSlots] = useState<string[]>([]);
   const [closed, setClosed] = useState(false);
@@ -173,30 +167,13 @@ export default function BookingForm({
             Pick a date &amp; time
           </h2>
 
-          <div className="flex gap-2 overflow-x-auto pb-3 mb-6 -mx-1 px-1">
-            {days.map((iso) => {
-              const p = dayParts(iso);
-              const off = closedWeekdays.includes(p.weekdayNum);
-              return (
-                <button
-                  key={iso}
-                  disabled={off}
-                  onClick={() => setSelectedDate(iso)}
-                  className={`flex flex-col items-center justify-center shrink-0 w-14 h-[68px] rounded-xl border text-xs transition-colors ${
-                    selectedDate === iso
-                      ? "bg-gold text-ink border-gold"
-                      : off
-                      ? "border-border text-white/20 cursor-not-allowed"
-                      : "border-border text-white/70 hover:border-gold/50"
-                  }`}
-                >
-                  <span className="uppercase text-[10px] tracking-wider">{p.weekday}</span>
-                  <span className="text-base font-semibold">{p.day}</span>
-                  <span className="text-[9px] uppercase opacity-60">{p.month}</span>
-                </button>
-              );
-            })}
-          </div>
+          <BookingCalendar
+            todayIso={todayIso}
+            serviceSlug={service.slug}
+            selectedDate={selectedDate}
+            onSelect={setSelectedDate}
+            closedWeekdays={closedWeekdays}
+          />
 
           {selectedDate && (
             <div aria-live="polite">

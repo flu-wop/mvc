@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { checkEnvVars, checkStripe, checkLastOrder, checkTurso, checkApiUsage } from "@/lib/health-checks";
+import { checkEnvVars, checkStripe, checkLastBooking, checkLastOrder, checkTurso, checkApiUsage, webhookUrl } from "@/lib/health-checks";
 import { isAdminAuthed } from "@/lib/admin-auth";
+import { SHOP_ENABLED } from "@/lib/features";
 
 export const runtime = "nodejs";
 
@@ -9,9 +10,10 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const [envVars, stripe, lastOrder, turso, apiUsage] = await Promise.all([
+  const [envVars, stripe, lastBooking, lastOrder, turso, apiUsage] = await Promise.all([
     Promise.resolve(checkEnvVars()),
     checkStripe(),
+    checkLastBooking(),
     checkLastOrder(),
     checkTurso(),
     checkApiUsage(),
@@ -19,7 +21,7 @@ export async function GET() {
 
   return NextResponse.json({
     envVars,
-    webhookHealth: { stripe, lastOrder, turso },
+    webhookHealth: { stripe, webhookUrl: webhookUrl(), lastBooking, ...(SHOP_ENABLED ? { lastOrder } : {}), turso },
     apiUsage,
     checkedAt: new Date().toISOString(),
   });

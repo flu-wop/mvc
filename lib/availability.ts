@@ -1,7 +1,7 @@
 import { getDb, initDb, OCCUPYING_STATUSES } from "./db";
 import { FALLBACK_DURATION_MINUTES } from "./service-defaults";
 import { getService } from "./services";
-import { formatTime, nowInShop, parseTime, weekdayOf } from "./time";
+import { addDays, daysBetween, formatTime, nowInShop, parseTime, weekdayOf, type ShopNow } from "./time";
 
 // Availability is computed from three things Margie controls in admin:
 // weekly business hours, blocked time, and the appointments already on the
@@ -170,40 +170,104 @@ export async function findConflicts(
   return conflicts;
 }
 
+// How far ahead clients can book.
+export const MAX_ADVANCE_DAYS = 90;
+
+type DayInputs = { hours: DayHours[]; settings: Settings; blocked: Blocked[]; booked: Interval[]; now: ShopNow };
+
+// One place that decides which start times exist for a day, so the day view,
+// the month calendar and checkout can never disagree.
+function computeSlots(
+  iso: string,
+  duration: number,
+  d: DayInputs
+): { slots: string[]; closed: boolean; reason?: "hours" | "blocked" } {
+  const h = d.hours.find((x) => x.weekday === weekdayOf(iso));
+  if (!h || h.closed) return { slots: [], closed: true, reason: "hours" };
+  const dayBlocked = d.blocked.filter((b) => b.startDate <= iso && b.endDate >= iso);
+  if (dayBlocked.some((b) => b.startMin == null)) return { slots: [], closed: true, reason: "blocked" };
+  if (iso < d.now.date || daysBetween(d.now.date, iso) > MAX_ADVANCE_DAYS) return { slots: [], closed: false };
+
+  const pad = d.settings.bufferMinutes;
+  const earliest = iso === d.now.date ? d.now.minutes + d.settings.minNoticeHours * 60 : 0;
+  const dayBooked = d.booked;
+  const slots: string[] = [];
+  for (let start = h.openMin; start + duration <= h.closeMin; start += d.settings.slotMinutes) {
+    if (start < earliest) continue;
+    const end = start + duration;
+    if (dayBlocked.some((b) => start < (b.endMin ?? 24 * 60) && (b.startMin ?? 0) < end)) continue;
+    if (dayBooked.some((x) => start < x.endMin + pad && x.startMin < end + pad)) continue;
+    slots.push(formatTime(start));
+  }
+  return { slots, closed: false };
+}
+
+async function durationFor(service: string | number): Promise<number> {
+  if (typeof service === "number") return service;
+  const svc = await getService(service);
+  return svc?.durationMinutes ?? FALLBACK_DURATION_MINUTES;
+}
+
 // Start times a client can pick for a given service on a given date.
 export async function availableSlots(
   isoDate: string,
   service: string | number
 ): Promise<{ slots: string[]; closed: boolean; reason?: "hours" | "blocked" }> {
-  const day = await getDayStatus(isoDate);
-  if (day.closed || !day.hours) return { slots: [], closed: true, reason: day.reason };
+  const duration = await durationFor(service);
+  const [hours, settings, blocked, booked] = await Promise.all([
+    getHours(),
+    getSettings(),
+    getBlockedBetween(isoDate, isoDate),
+    bookedOnDate(isoDate),
+  ]);
+  return computeSlots(isoDate, duration, { hours, settings, blocked, booked, now: nowInShop() });
+}
 
-  let duration: number;
-  if (typeof service === "number") {
-    duration = service;
-  } else {
-    const svc = await getService(service);
-    duration = svc?.durationMinutes ?? FALLBACK_DURATION_MINUTES;
+async function bookedBetween(from: string, to: string): Promise<Map<string, Interval[]>> {
+  await initDb();
+  const ph = OCCUPYING_STATUSES.map(() => "?").join(",");
+  const rows = (
+    await getDb().execute({
+      sql: `SELECT id, name, service, status, event_date, event_time, duration_minutes
+            FROM bookings WHERE event_date BETWEEN ? AND ? AND status IN (${ph})`,
+      args: [from, to, ...OCCUPYING_STATUSES],
+    })
+  ).rows as any[];
+  const out = new Map<string, Interval[]>();
+  for (const r of rows) {
+    const start = parseTime(String(r.event_time));
+    if (start == null) continue;
+    const list = out.get(String(r.event_date)) ?? [];
+    list.push({
+      id: Number(r.id),
+      startMin: start,
+      endMin: start + (Number(r.duration_minutes) || FALLBACK_DURATION_MINUTES),
+      name: String(r.name),
+      service: String(r.service),
+      status: String(r.status),
+    });
+    out.set(String(r.event_date), list);
   }
+  return out;
+}
 
-  const settings = await getSettings();
-  const [blocked, booked] = await Promise.all([getBlockedBetween(isoDate, isoDate), bookedOnDate(isoDate)]);
-  const pad = settings.bufferMinutes;
+// Number of open start times per day for a whole month ("2026-10"), in four
+// queries total. 0 means closed, blocked, past or fully booked.
+export async function monthAvailability(month: string, service: string | number): Promise<Record<string, number>> {
+  const [y, m] = month.split("-").map(Number);
+  const first = `${month}-01`;
+  const last = addDays(first, new Date(Date.UTC(y, m, 0)).getUTCDate() - 1);
+  const duration = await durationFor(service);
+  const [hours, settings, blocked, booked] = await Promise.all([
+    getHours(),
+    getSettings(),
+    getBlockedBetween(first, last),
+    bookedBetween(first, last),
+  ]);
   const now = nowInShop();
-
-  if (isoDate < now.date) return { slots: [], closed: false };
-  const earliest = isoDate === now.date ? now.minutes + settings.minNoticeHours * 60 : 0;
-
-  const slots: string[] = [];
-  const { openMin, closeMin } = day.hours;
-  for (let start = openMin; start + duration <= closeMin; start += settings.slotMinutes) {
-    if (start < earliest) continue;
-    const end = start + duration;
-    const hitsBlock = blocked.some((b) => start < (b.endMin ?? 24 * 60) && (b.startMin ?? 0) < end);
-    if (hitsBlock) continue;
-    const hitsBooking = booked.some((x) => start < x.endMin + pad && x.startMin < end + pad);
-    if (hitsBooking) continue;
-    slots.push(formatTime(start));
+  const out: Record<string, number> = {};
+  for (let iso = first; iso <= last; iso = addDays(iso, 1)) {
+    out[iso] = computeSlots(iso, duration, { hours, settings, blocked, booked: booked.get(iso) ?? [], now }).slots.length;
   }
-  return { slots, closed: false };
+  return out;
 }

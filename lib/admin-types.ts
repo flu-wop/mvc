@@ -22,6 +22,9 @@ export type Appointment = {
   source: string;
   color: string;
   createdAt: string | null;
+  /** Paid online through Stripe, so the deposit can be refunded from admin. */
+  stripeBacked: boolean;
+  refundedAt: string | null;
 };
 
 export type ClientRow = {

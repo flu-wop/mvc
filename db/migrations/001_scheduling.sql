@@ -52,6 +52,8 @@ CREATE TABLE IF NOT EXISTS settings (
   value TEXT NOT NULL
 );
 
+ALTER TABLE newsletter ADD COLUMN interest TEXT;
+
 -- New booking columns
 ALTER TABLE bookings ADD COLUMN service_slug TEXT;
 ALTER TABLE bookings ADD COLUMN duration_minutes INTEGER;
@@ -61,6 +63,7 @@ ALTER TABLE bookings ADD COLUMN total_cents INTEGER;
 ALTER TABLE bookings ADD COLUMN source TEXT DEFAULT 'online';
 ALTER TABLE bookings ADD COLUMN reminder_sent_at TEXT;
 ALTER TABLE bookings ADD COLUMN cancelled_at TEXT;
+ALTER TABLE bookings ADD COLUMN refunded_at TEXT;
 CREATE INDEX IF NOT EXISTS idx_bookings_date ON bookings(event_date);
 CREATE INDEX IF NOT EXISTS idx_bookings_client ON bookings(client_id);
 

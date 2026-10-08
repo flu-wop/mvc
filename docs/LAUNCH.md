@@ -12,6 +12,20 @@
 | NEXT_PUBLIC_SITE_URL | the live URL, no trailing slash |
 | NEXT_PUBLIC_FEATURE_SHOP | leave unset. `true` brings back the shop pages and Orders in admin |
 
+## 1b. Wire Stripe (about 10 minutes)
+1. Stripe Dashboard, top-right toggle: start in **Test mode**.
+2. Developers, API keys: copy the **Secret key** (`sk_test_...`) into Vercel as `STRIPE_SECRET_KEY`.
+3. Developers, Webhooks, Add endpoint. URL: `<site>/api/stripe/webhook` (Admin, System shows the exact URL). Event: `checkout.session.completed` only.
+4. Open the new endpoint, reveal **Signing secret** (`whsec_...`), put it in Vercel as `STRIPE_WEBHOOK_SECRET`. Redeploy.
+5. Admin, System: Env Vars shows STRIPE_SECRET_KEY "TEST mode" and Webhook Health shows the endpoint enabled. Both green = wired.
+6. Run section 2 below. For launch, repeat 1 to 4 in **Live mode** (new key, new endpoint, new signing secret) and replace the three Vercel values. The test and live endpoints are separate in Stripe.
+7. Refunds: Admin, click the appointment, "Refund deposit" (online bookings only). Cancelling never refunds by itself, since the policy keeps deposits on late cancels.
+8. Checkout links expire after 30 minutes, so a stale tab can't pay for a slot that has since been given away.
+
+Shareable booking card: `<site>/card` (tap-to-book page), `/card/image.png` (1080x1350 story/post image), `/card/qr.png` and `/card/qr.svg` (QR to the site). All regenerate from `NEXT_PUBLIC_SITE_URL`, so they follow the custom domain automatically. To change the photo, edit `CARD_IMAGE` in `app/card/page.tsx` and `app/card/image.png/route.tsx`.
+
+Placeholders to remove or update before launch: the "Coming soon" band (Shop, Tutorials, Merch). Delete `<ComingSoon />` in `app/page.tsx`, or set `NEXT_PUBLIC_HIDE_COMING_SOON=true`. `/shop` shows the same placeholder until the shop is real.
+
 ## 2. Deposit-to-calendar test (Stripe test mode first)
 1. Open `/book`, pick Gel-X, a date and time, fill the form, pay with `4242 4242 4242 4242`.
 2. Success page shows; Stripe dashboard shows a $25 payment.

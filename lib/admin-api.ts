@@ -51,6 +51,8 @@ export async function mapAppointments(rows: any[]): Promise<Appointment[]> {
       source: String(r.source ?? "online"),
       color: svc?.color ?? "#C9A96E",
       createdAt: r.created_at == null ? null : String(r.created_at),
+      stripeBacked: !!r.stripe_session_id,
+      refundedAt: r.refunded_at == null ? null : String(r.refunded_at),
     };
   });
 }

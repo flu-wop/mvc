@@ -86,7 +86,7 @@ export function AppointmentPanel({
         {a.phone && <p><a className="text-gold" href={`tel:${a.phone}`}>{a.phone}</a></p>}
         {a.email && <p><a className="text-gold break-all" href={`mailto:${a.email}`}>{a.email}</a></p>}
         <p className="text-grey">
-          Deposit {money(a.depositCents)} {a.depositPaid ? "received" : "not received yet"} · {a.source === "manual" ? "added by hand" : "booked online"}
+          Deposit {money(a.depositCents)} {a.refundedAt ? "refunded" : a.depositPaid ? "received" : "not received yet"} · {a.source === "manual" ? "added by hand" : "booked online"}
         </p>
         {a.message && <p className="text-grey">Client note: {a.message}</p>}
       </div>
@@ -127,7 +127,7 @@ export function AppointmentPanel({
               <input type="checkbox" checked={sendEmail} onChange={(e) => setSendEmail(e.target.checked)} /> Email {a.name.split(" ")[0]} that it was cancelled
             </label>
           )}
-          <p className="text-xs text-grey">Deposits are refunded in Stripe, not here.</p>
+          <p className="text-xs text-grey">Cancelling doesn&apos;t refund the deposit. Use &ldquo;Refund deposit&rdquo; afterward if it&apos;s owed.</p>
           <div className="flex gap-2">
             <button disabled={busy} className={btnGold} onClick={() => act({ action: "cancel", sendEmail })}>Yes, cancel it</button>
             <button className={btnGhost} onClick={() => setMode("view")}>Keep it</button>
@@ -149,6 +149,21 @@ export function AppointmentPanel({
             <button className={btnGhost} disabled={busy} onClick={() => act({ action: "restore" })}>Restore</button>
           )}
           {!cancelled && <button className={btnGhost + " !text-red-300 !border-red-500/30"} disabled={busy} onClick={() => setMode("cancel")}>Cancel</button>}
+        </div>
+      )}
+
+      {a.stripeBacked && !a.refundedAt && a.status !== "pending" && (
+        <div className="rounded-2xl border border-border p-4 space-y-2">
+          <p className="text-sm text-white/80">Deposits are kept on late cancels and no-shows. Refund only when it's owed (for example a double booking).</p>
+          <button
+            className={btnGhost}
+            disabled={busy}
+            onClick={() => {
+              if (window.confirm(`Refund the ${money(a.depositCents)} deposit to ${a.name} in Stripe? This can't be undone.`)) act({ action: "refund" });
+            }}
+          >
+            Refund {money(a.depositCents)} deposit
+          </button>
         </div>
       )}
 

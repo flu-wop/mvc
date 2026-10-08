@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   const ok = await rateLimit(`newsletter:${clientIp(req)}`, 5, 600); // 5 per 10 min
   if (!ok) return new NextResponse("Too many requests", { status: 429 });
 
-  const { email } = await req.json();
+  const { email, interest } = await req.json().catch(() => ({}));
 
   if (!email || typeof email !== "string" || email.length > 200 || !/^\S+@\S+\.\S+$/.test(email)) {
     return NextResponse.json({ error: "Invalid email" }, { status: 400 });
@@ -18,8 +18,9 @@ export async function POST(req: NextRequest) {
     await initDb();
     const db = getDb();
     await db.execute({
-      sql: `INSERT INTO newsletter (email) VALUES (?) ON CONFLICT(email) DO NOTHING`,
-      args: [email],
+      sql: `INSERT INTO newsletter (email, interest) VALUES (?, ?)
+            ON CONFLICT(email) DO UPDATE SET interest = COALESCE(excluded.interest, newsletter.interest)`,
+      args: [email, typeof interest === "string" && /^[a-z,]{1,60}$/.test(interest) ? interest : null],
     });
     return NextResponse.json({ ok: true });
   } catch (err) {

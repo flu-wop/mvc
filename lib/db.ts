@@ -164,6 +164,7 @@ async function runInit() {
   `);
 
   // ── New booking columns ────────────────────────────────────────────────
+  await addColumn("newsletter", "interest", "TEXT");
   await addColumn("bookings", "service_slug", "TEXT");
   await addColumn("bookings", "duration_minutes", "INTEGER");
   await addColumn("bookings", "client_id", "INTEGER");
@@ -172,6 +173,7 @@ async function runInit() {
   await addColumn("bookings", "source", "TEXT DEFAULT 'online'");
   await addColumn("bookings", "reminder_sent_at", "TEXT");
   await addColumn("bookings", "cancelled_at", "TEXT");
+  await addColumn("bookings", "refunded_at", "TEXT");
   await db.execute(`CREATE INDEX IF NOT EXISTS idx_bookings_date ON bookings(event_date)`);
   await db.execute(`CREATE INDEX IF NOT EXISTS idx_bookings_client ON bookings(client_id)`);
 

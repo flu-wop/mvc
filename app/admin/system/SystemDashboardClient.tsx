@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 type CheckResult = { status: "ok" | "warn" | "error"; detail: string };
 type HealthData = {
   envVars: Record<string, CheckResult>;
-  webhookHealth: { stripe: CheckResult; lastOrder: CheckResult; turso: CheckResult };
+  webhookHealth: Record<string, CheckResult>;
   apiUsage: CheckResult;
   checkedAt: string;
 };

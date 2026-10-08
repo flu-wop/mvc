@@ -76,6 +76,13 @@ export async function POST(req: NextRequest) {
     success_url: `${SITE_URL}/book/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${SITE_URL}/book?canceled=1`,
     customer_email: email,
+    // A deposit can only be paid within 30 minutes of starting checkout, so a
+    // stale tab can't pay for a slot that has long since been given away.
+    expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+    payment_intent_data: {
+      description: `${service.title} deposit — ${eventDate} ${eventTime} — ${name.trim()}`,
+      metadata: { type: "booking", service_slug: service.slug, event_date: eventDate, event_time: eventTime },
+    },
     metadata: {
       type: "booking",
       name: name.trim(),

@@ -4,6 +4,7 @@ import { bad, getAppointment, isUniqueViolation, readJson, str } from "@/lib/adm
 import { getDb, initDb } from "@/lib/db";
 import { findConflicts } from "@/lib/availability";
 import { formatTime, isIsoDate, parseTime } from "@/lib/time";
+import { getStripe } from "@/lib/stripe";
 import { sendCancellationEmail, sendRescheduleEmail } from "@/lib/email";
 import type { Appointment } from "@/lib/admin-types";
 
@@ -130,6 +131,26 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
         // A deposit that was never collected goes back to pending, not paid.
         const back = current.depositCents > 0 && current.source === "manual" && !current.depositPaid ? "pending" : "paid";
         await setStatus(back, ", cancelled_at = NULL");
+        return NextResponse.json({ appointment: await getAppointment(id) });
+      }
+
+      case "refund": {
+        // Refunds the Stripe deposit in full. Whether she is owed one is Margie's call
+        // (the policy keeps deposits on late cancels), so this never happens automatically.
+        if (current.refundedAt) return bad("Already refunded");
+        const row = (await db.execute({ sql: `SELECT stripe_session_id FROM bookings WHERE id = ?`, args: [id] })).rows[0] as any;
+        if (!row?.stripe_session_id) return bad("This deposit wasn't paid through Stripe, so there's nothing to refund here.");
+        try {
+          const stripe = getStripe();
+          const session = await stripe.checkout.sessions.retrieve(String(row.stripe_session_id));
+          const pi = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id;
+          if (!pi) return bad("Stripe has no payment on file for this booking.", 409);
+          await stripe.refunds.create({ payment_intent: pi, metadata: { booking_id: String(id) } }, { idempotencyKey: `refund-booking-${id}` });
+        } catch (err) {
+          console.error("[admin refund] failed", err);
+          return bad(`Stripe couldn't refund this: ${(err as Error).message}`, 502);
+        }
+        await db.execute({ sql: `UPDATE bookings SET refunded_at = ? WHERE id = ?`, args: [new Date().toISOString(), id] });
         return NextResponse.json({ appointment: await getAppointment(id) });
       }
 

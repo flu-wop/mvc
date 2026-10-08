@@ -198,7 +198,7 @@ export function CalendarApp({ feedUnprotected }: { feedUnprotected: boolean }) {
           appt={selected}
           onClose={() => setSelected(null)}
           onChanged={(a) => {
-            setSelected(a.status === "cancelled" ? null : a);
+            setSelected(a); // stays open after a cancel so a refund can follow
             load();
           }}
         />
