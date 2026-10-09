@@ -23,6 +23,15 @@ export default async function CardPage() {
   return (
     <main className="min-h-screen bg-ink flex flex-col items-center px-4 py-8 sm:py-12">
       <div className="w-full max-w-[560px]">
+        <Image
+          src="/images/booking-page.png"
+          alt="MVC Creations booking page: meet Margie, hours, contact, services, booking policies"
+          width={2000}
+          height={8000}
+          sizes="(max-width: 560px) 100vw, 560px"
+          className="w-full h-auto rounded-2xl mb-8"
+          priority
+        />
         <div className="rounded-3xl border border-border bg-charcoal p-5 mb-6 flex items-center gap-5">
           <div
             className="shrink-0 w-[112px] h-[112px] rounded-xl overflow-hidden [&>svg]:w-full [&>svg]:h-full"
@@ -39,7 +48,7 @@ export default async function CardPage() {
           </div>
         </div>
 
-        <div className="space-y-3 mb-8">
+        <div className="space-y-3 pb-4">
           <Link href="/book" className={`${btn} w-full bg-gold text-ink hover:bg-gold-light`}>
             Book now
           </Link>
@@ -58,15 +67,6 @@ export default async function CardPage() {
           </div>
         </div>
 
-        <Image
-          src="/images/booking-page.png"
-          alt="MVC Creations booking page: meet Margie, hours, contact, services, booking policies"
-          width={2000}
-          height={8000}
-          sizes="(max-width: 560px) 100vw, 560px"
-          className="w-full h-auto rounded-2xl"
-          priority
-        />
       </div>
     </main>
   );
