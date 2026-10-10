@@ -143,7 +143,8 @@ export async function POST(req: Request) {
       r = await db.execute({
         sql: `INSERT OR IGNORE INTO orders (email, items_json, amount_cents, stripe_session_id, status)
               VALUES (?, ?, ?, ?, 'paid')`,
-        args: [m.email, m.items_json, Number(m.amount_cents), s.id],
+        // Record what Stripe actually charged, not what the metadata says.
+        args: [m.email, m.items_json, s.amount_total ?? Number(m.amount_cents), s.id],
       });
     } catch (err: any) {
       console.error("[stripe-webhook] Order DB write failed:", err);
