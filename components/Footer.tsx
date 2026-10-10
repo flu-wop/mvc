@@ -182,6 +182,10 @@ export default function Footer() {
               Privacy Policy
             </Link>
           </p>
+          <p className="text-white/30 text-xs">
+            Designed by{" "}
+            <a href="https://in-flu-ential.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition-colors">IN-FLU-ENTIAL</a>
+          </p>
           <button
             onClick={() => setInquiryOpen(true)}
             className="text-xs text-white/40 hover:text-gold transition-colors underline underline-offset-4 decoration-white/15"
