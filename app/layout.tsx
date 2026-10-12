@@ -1,3 +1,4 @@
+import { SiteAnalytics } from "@/components/analytics/SiteAnalytics"
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import StickyBook from "@/components/StickyBook";
@@ -59,6 +60,7 @@ export default function RootLayout({
         />
       </head>
       <body className="grain antialiased">
+        <SiteAnalytics />
         {children}
         <StickyBook />
       </body>

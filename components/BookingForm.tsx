@@ -1,4 +1,5 @@
 "use client";
+import { beacon } from "@/lib/beacon"
 
 import { useEffect, useState } from "react";
 import BookingCalendar from "./BookingCalendar";
@@ -99,6 +100,7 @@ export default function BookingForm({
     setStatus("loading");
     setError("");
     try {
+      beacon("checkout_click")
       const res = await fetch("/api/checkout/booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

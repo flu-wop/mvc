@@ -1,7 +1,7 @@
 "use client"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { Package, Calendar, CalendarDays, Users, Scissors, Clock, Mail, Activity } from "lucide-react"
+import { Package, Calendar, CalendarDays, Users, Scissors, Clock, Mail, Activity, BarChart3 } from "lucide-react"
 import { SHOP_ENABLED } from "@/lib/features"
 import { LogoutButton } from "./LogoutButton"
 
@@ -12,6 +12,7 @@ const SECTIONS = [
   { href: "/admin/hours",     icon: Clock,    label: "Hours" },
   { href: "/admin/bookings",  icon: Calendar, label: "List" },
   { href: "/admin/inquiries", icon: Mail,     label: "Inquiries" },
+  { href: "/admin/insights", icon: BarChart3, label: "Insights" },
   ...(SHOP_ENABLED ? [{ href: "/admin/orders", icon: Package, label: "Orders" }] : []),
   { href: "/admin/system",    icon: Activity, label: "System" },
 ]
