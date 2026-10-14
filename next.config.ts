@@ -10,8 +10,8 @@ const nextConfig: NextConfig = {
     ],
   },
   async redirects() {
-    // The admin lives at /admin; /admin-dashboard is the bookmark-friendly alias.
-    return [{ source: "/admin-dashboard", destination: "/admin", permanent: false }];
+    // /admin is the home; /admin-dashboard is the bookmark-friendly alias for the calendar.
+    return [{ source: "/admin-dashboard", destination: "/admin/calendar", permanent: false }];
   },
   async headers() {
     return [
