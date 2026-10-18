@@ -6,14 +6,18 @@
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import HomeHero from "@/components/home/HomeHero";
-import ServiceCards from "@/components/home/ServiceCards";
-import Policies from "@/components/Policies";
+import Hero from "@/components/Hero";
+import ServiceMenu from "@/components/home/ServiceMenu";
+import PolicyStrip from "@/components/home/PolicyStrip";
+import ChooseExperience from "@/components/ChooseExperience";
+import NailCards from "@/components/NailCards";
 import PortfolioPreview from "@/components/home/PortfolioPreview";
 import MargieIntro from "@/components/home/MargieIntro";
+import ShopPreview from "@/components/ShopPreview";
+import Tutorials from "@/components/Tutorials";
+import FeaturedCollaborations from "@/components/FeaturedCollaborations";
+import FAQ from "@/components/FAQ";
 import BookBand from "@/components/home/BookBand";
-import ComingSoon from "@/components/home/ComingSoon"; // PLACEHOLDER: remove before launch
-import { COMING_SOON_ENABLED } from "@/lib/features";
 import { getServices } from "@/lib/services";
 import { formatPrice } from "@/lib/service-defaults";
 import { BUSINESS, SITE_URL } from "@/lib/site";
@@ -42,12 +46,17 @@ export default async function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Navbar />
       <main>
-        <HomeHero depositLabel={deposit} />
-        <ServiceCards services={services} depositLabel={deposit} />
-        <Policies />
+        <Hero />
+        <ServiceMenu services={services} depositLabel={deposit} />
+        <PolicyStrip depositLabel={deposit} />
+        <ChooseExperience />
+        <NailCards catalog={services} />
         <PortfolioPreview limit={8} />
         <MargieIntro />
-        {COMING_SOON_ENABLED && <ComingSoon />}
+        <ShopPreview />
+        <Tutorials />
+        <FeaturedCollaborations />
+        <FAQ />
         <BookBand />
       </main>
       <Footer />
