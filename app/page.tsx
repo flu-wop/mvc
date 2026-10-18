@@ -47,12 +47,12 @@ export default async function HomePage() {
       <Navbar />
       <main>
         <Hero />
+        <MargieIntro />
         <ServiceMenu services={services} depositLabel={deposit} />
         <PolicyStrip depositLabel={deposit} />
         <ChooseExperience />
         <NailCards catalog={services} />
         <PortfolioPreview limit={8} />
-        <MargieIntro />
         <ShopPreview />
         <Tutorials />
         <FeaturedCollaborations />
