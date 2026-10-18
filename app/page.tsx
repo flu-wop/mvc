@@ -7,8 +7,8 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import HomeHero from "@/components/home/HomeHero";
-import ServiceMenu from "@/components/home/ServiceMenu";
-import PolicyStrip from "@/components/home/PolicyStrip";
+import ServiceCards from "@/components/home/ServiceCards";
+import Policies from "@/components/Policies";
 import PortfolioPreview from "@/components/home/PortfolioPreview";
 import MargieIntro from "@/components/home/MargieIntro";
 import BookBand from "@/components/home/BookBand";
@@ -43,8 +43,8 @@ export default async function HomePage() {
       <Navbar />
       <main>
         <HomeHero depositLabel={deposit} />
-        <ServiceMenu services={services} depositLabel={deposit} />
-        <PolicyStrip depositLabel={deposit} />
+        <ServiceCards services={services} depositLabel={deposit} />
+        <Policies />
         <PortfolioPreview limit={8} />
         <MargieIntro />
         {COMING_SOON_ENABLED && <ComingSoon />}

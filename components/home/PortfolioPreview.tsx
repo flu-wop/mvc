@@ -31,7 +31,7 @@ export default function PortfolioPreview({ limit = 8 }: { limit?: number }) {
             <Reveal key={set.id} delay={Math.min((i % 3) * 0.05, 0.15)} className="break-inside-avoid mb-3 md:mb-5">
               <Link
                 href={`/book?service=${set.serviceSlug}`}
-                className="group relative block overflow-hidden rounded-sm border border-transparent hover:border-gold/60 transition-colors"
+                className="group relative block overflow-hidden rounded-2xl border border-border hover:border-gold/60 transition-colors"
               >
                 <div className={`relative ${SHAPES[i % SHAPES.length]}`}>
                   <Image

@@ -16,7 +16,7 @@ export const PORTFOLIO: PortfolioSet[] = [
     title: "Chocolate Chrome",
     image: "/images/service-gel-x.jpg",
     alt: "Almond stiletto Gel-X set in chocolate french tips with a sculpted gold chrome accent nail",
-    serviceSlug: "gel-x",
+    serviceSlug: "solid-classic-gel-x-set",
     serviceLabel: "Gel-X",
   },
   {
@@ -24,7 +24,7 @@ export const PORTFOLIO: PortfolioSet[] = [
     title: "Koi Pond",
     image: "/images/service-nail-art.jpg",
     alt: "Long square nail art set with encapsulated koi fish, wave detail, flowers and gold stars on blue",
-    serviceSlug: "nail-art",
+    serviceSlug: "tier-2-freestyle-set",
     serviceLabel: "Nail Art",
   },
   {
@@ -32,7 +32,7 @@ export const PORTFOLIO: PortfolioSet[] = [
     title: "Frost Marble",
     image: "/images/service-acrylic.jpg",
     alt: "Extra long square acrylics in marble, 3D white texture and a crystal flower accent",
-    serviceSlug: "acrylic",
+    serviceSlug: "signature-acrylic-full-set",
     serviceLabel: "Acrylic",
   },
   {
@@ -40,7 +40,7 @@ export const PORTFOLIO: PortfolioSet[] = [
     title: "Blue Willow",
     image: "/images/service-natural-nails.jpg",
     alt: "Short natural nails with white french tips, silver lines and hand-painted blue flowers",
-    serviceSlug: "natural-nails",
+    serviceSlug: "luxury-signature-manicure",
     serviceLabel: "Natural Nails",
   },
 ];
